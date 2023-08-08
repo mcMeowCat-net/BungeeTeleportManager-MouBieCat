@@ -1,0 +1,22 @@
+name: BungeeTeleportManager-MouBieCat
+description: "該插件針對 BungeeTeleportManager 擴充，提供更方便的使用方式。"
+
+author: MouBieCat
+website: https://github.com/moubiecat
+
+version: ${project.version}
+api-version: ${bukkit-api.version}
+depend:
+  - BungeeTeleportManager
+database: true
+
+main: net.moubiecat.bungeeteleportmanager.MouBieCat
+
+commands:
+  MBBungeeTeleportManager:
+    description: "主要的插件指令。"
+
+permissions:
+  MBBungeeTeleportManager.reload:
+    description: "重載插件設定。"
+    default: op
