@@ -1,5 +1,6 @@
 package net.moubiecat.bungeeteleportmanager.data.database;
 
+import net.moubiecat.bungeeteleportmanager.data.TeleportHistoryData;
 import org.apache.ibatis.annotations.*;
 import org.bukkit.Location;
 import org.bukkit.event.player.PlayerTeleportEvent;

@@ -1,4 +1,4 @@
-package net.moubiecat.bungeeteleportmanager.data.database;
+package net.moubiecat.bungeeteleportmanager.data;
 
 import org.bukkit.Location;
 import org.bukkit.event.player.PlayerTeleportEvent;

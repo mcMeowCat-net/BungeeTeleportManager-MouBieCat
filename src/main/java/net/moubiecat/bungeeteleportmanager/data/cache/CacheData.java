@@ -1,6 +1,6 @@
 package net.moubiecat.bungeeteleportmanager.data.cache;
 
-import net.moubiecat.bungeeteleportmanager.data.database.TeleportHistoryData;
+import net.moubiecat.bungeeteleportmanager.data.TeleportHistoryData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;

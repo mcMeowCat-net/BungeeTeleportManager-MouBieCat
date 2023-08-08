@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import main.java.me.avankziar.spigot.btm.BungeeTeleportManager;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheData;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheManager;
-import net.moubiecat.bungeeteleportmanager.data.database.TeleportHistoryData;
+import net.moubiecat.bungeeteleportmanager.data.TeleportHistoryData;
 import net.moubiecat.bungeeteleportmanager.data.database.TeleportHistoryTable;
 import net.moubiecat.bungeeteleportmanager.settings.ConfigYaml;
 import org.bukkit.Location;

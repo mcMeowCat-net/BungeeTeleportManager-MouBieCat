@@ -1,6 +1,7 @@
 package net.moubiecat.bungeeteleportmanager.data.database;
 
 import net.moubiecat.bungeeteleportmanager.MouBieCat;
+import net.moubiecat.bungeeteleportmanager.data.TeleportHistoryData;
 import org.apache.ibatis.session.SqlSession;
 
 import java.util.List;
