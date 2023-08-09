@@ -8,7 +8,7 @@ import net.moubiecat.bungeeteleportmanager.data.database.handler.TeleportCauseTy
 import net.moubiecat.bungeeteleportmanager.data.database.handler.UUIDTypeHandler;
 import net.moubiecat.bungeeteleportmanager.listener.InventoryListener;
 import net.moubiecat.bungeeteleportmanager.listener.PlayerListener;
-import net.moubiecat.bungeeteleportmanager.menu.TeleportHistoryMenu;
+import net.moubiecat.bungeeteleportmanager.menu.HistoryMenu;
 import net.moubiecat.bungeeteleportmanager.settings.ConfigYaml;
 import net.moubiecat.bungeeteleportmanager.settings.ConnectionYaml;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -96,7 +96,7 @@ public final class MouBieCat extends JavaPlugin {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player player && args.length == 1 && args[0].equalsIgnoreCase("history")) {
             // 如果輸入參數為 history，則顯示歷史紀錄
-            MouBieCat.getInstance(TeleportHistoryMenu.class).open(player);
+            MouBieCat.getInstance(HistoryMenu.class).open(player);
             return true;
         }
 
