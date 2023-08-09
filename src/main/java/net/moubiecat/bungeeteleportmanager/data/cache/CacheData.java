@@ -1,6 +1,6 @@
 package net.moubiecat.bungeeteleportmanager.data.cache;
 
-import net.moubiecat.bungeeteleportmanager.data.TeleportHistoryData;
+import net.moubiecat.bungeeteleportmanager.data.HistoryData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public final class CacheData {
     private final UUID uuid;
-    private final List<TeleportHistoryData> data = new LinkedList<>();
+    private final List<HistoryData> data = new LinkedList<>();
 
     /**
      * 建構子
@@ -35,7 +35,7 @@ public final class CacheData {
      *
      * @param data 傳送資料
      */
-    public void addData(@NotNull TeleportHistoryData data) {
+    public void addData(@NotNull HistoryData data) {
         this.data.add(data);
     }
 
@@ -45,7 +45,7 @@ public final class CacheData {
      * @return 傳送資料
      */
     @NotNull
-    public List<TeleportHistoryData> getData() {
+    public List<HistoryData> getData() {
         return this.data;
     }
 }

@@ -1,25 +1,34 @@
 package net.moubiecat.bungeeteleportmanager.data.database;
 
 import net.moubiecat.bungeeteleportmanager.MouBieCat;
-import net.moubiecat.bungeeteleportmanager.data.TeleportHistoryData;
+import net.moubiecat.bungeeteleportmanager.data.HistoryData;
 import org.apache.ibatis.session.SqlSession;
 
 import java.util.List;
 import java.util.UUID;
 
-public final class TeleportHistoryTableImpl implements TeleportHistoryTable {
+public final class HistoryTableImpl implements HistoryTable {
     @Override
-    public List<TeleportHistoryData> selectTeleportInformation(UUID uuid) {
+    public void createTable() {
         try (final SqlSession sqlSession = MouBieCat.getSqlSessionFactory().openSession()) {
-            final TeleportHistoryTable mapper = sqlSession.getMapper(TeleportHistoryTable.class);
-            return mapper.selectTeleportInformation(uuid);
+            final HistoryTable mapper = sqlSession.getMapper(HistoryTable.class);
+            mapper.createTable();
+            sqlSession.commit();
         }
     }
 
     @Override
-    public void insertData(TeleportHistoryData data) {
+    public List<HistoryData> selectData(UUID uuid) {
         try (final SqlSession sqlSession = MouBieCat.getSqlSessionFactory().openSession()) {
-            final TeleportHistoryTable dataMapper = sqlSession.getMapper(TeleportHistoryTable.class);
+            final HistoryTable mapper = sqlSession.getMapper(HistoryTable.class);
+            return mapper.selectData(uuid);
+        }
+    }
+
+    @Override
+    public void insertData(HistoryData data) {
+        try (final SqlSession sqlSession = MouBieCat.getSqlSessionFactory().openSession()) {
+            final HistoryTable dataMapper = sqlSession.getMapper(HistoryTable.class);
             dataMapper.insertData(data);
             sqlSession.commit();
         }
@@ -28,7 +37,7 @@ public final class TeleportHistoryTableImpl implements TeleportHistoryTable {
     @Override
     public void deleteData(UUID player) {
         try (final SqlSession sqlSession = MouBieCat.getSqlSessionFactory().openSession()) {
-            final TeleportHistoryTable dataMapper = sqlSession.getMapper(TeleportHistoryTable.class);
+            final HistoryTable dataMapper = sqlSession.getMapper(HistoryTable.class);
             dataMapper.deleteData(player);
             sqlSession.commit();
         }
@@ -37,7 +46,7 @@ public final class TeleportHistoryTableImpl implements TeleportHistoryTable {
     @Override
     public void deleteDataForTime(UUID player, long time) {
         try (final SqlSession sqlSession = MouBieCat.getSqlSessionFactory().openSession()) {
-            final TeleportHistoryTable dataMapper = sqlSession.getMapper(TeleportHistoryTable.class);
+            final HistoryTable dataMapper = sqlSession.getMapper(HistoryTable.class);
             dataMapper.deleteDataForTime(player, time);
             sqlSession.commit();
         }

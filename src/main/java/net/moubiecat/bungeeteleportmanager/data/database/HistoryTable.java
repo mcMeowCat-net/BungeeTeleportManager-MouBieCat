@@ -1,6 +1,6 @@
 package net.moubiecat.bungeeteleportmanager.data.database;
 
-import net.moubiecat.bungeeteleportmanager.data.TeleportHistoryData;
+import net.moubiecat.bungeeteleportmanager.data.HistoryData;
 import org.apache.ibatis.annotations.*;
 import org.bukkit.Location;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -8,22 +8,25 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import java.util.List;
 import java.util.UUID;
 
-public interface TeleportHistoryTable {
+public interface HistoryTable {
     String TABLE_NAME = "btmteleporthistory";
+
+    @Update("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (UUID VARCHAR(36) NOT NULL, TIME LONG NOT NULL, SERVER VARCHAR(16) NOT NULL, CAUSE VARCHAR(16) NOT NULL, FROM_LOCATION JSON, TO_LOCATION JSON)")
+    void createTable();
 
     @Select("SELECT * FROM " + TABLE_NAME + " WHERE UUID = #{uuid}")
     @Results({
-            @Result(column = "TIME", property = "time", javaType = long.class),
             @Result(column = "UUID", property = "uuid", javaType = UUID.class),
+            @Result(column = "TIME", property = "time", javaType = long.class),
             @Result(column = "SERVER", property = "server", javaType = String.class),
             @Result(column = "CAUSE", property = "cause", javaType = PlayerTeleportEvent.TeleportCause.class),
             @Result(column = "FROM_LOCATION", property = "fromLocation", javaType = Location.class),
             @Result(column = "TO_LOCATION", property = "toLocation", javaType = Location.class)
     })
-    List<TeleportHistoryData> selectTeleportInformation(UUID uuid);
+    List<HistoryData> selectData(UUID uuid);
 
     @Insert("INSERT INTO " + TABLE_NAME + " (TIME, UUID, SERVER, CAUSE, FROM_LOCATION, TO_LOCATION) VALUES (#{time}, #{uuid}, #{server}, #{cause}, #{fromLocation}, #{toLocation})")
-    void insertData(TeleportHistoryData data);
+    void insertData(HistoryData data);
 
     @Delete("DELETE FROM " + TABLE_NAME + " WHERE UUID = #{uuid}")
     void deleteData(@Param("uuid") UUID player);
