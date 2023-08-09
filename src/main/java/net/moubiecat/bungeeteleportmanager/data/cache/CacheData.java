@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 public final class CacheData {
+    public static final int HISTORY_DATA_SIZE = 7;
+
     private final UUID uuid;
     private final List<HistoryData> data = new LinkedList<>();
 
@@ -36,7 +38,11 @@ public final class CacheData {
      * @param data 傳送資料
      */
     public void addData(@NotNull HistoryData data) {
+        if (this.data.size() >= HISTORY_DATA_SIZE)
+            this.data.subList(HISTORY_DATA_SIZE - 1, this.data.size()).clear();
         this.data.add(data);
+        // 排序
+        this.data.sort((o1, o2) -> (int) (o2.getTime() - o1.getTime()));
     }
 
     /**

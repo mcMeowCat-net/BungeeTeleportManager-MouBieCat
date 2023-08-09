@@ -1,5 +1,3 @@
-MaxTeleportHistory: 7
-
 LogCauses:
   - "COMMAND"
   - "PLUGIN"

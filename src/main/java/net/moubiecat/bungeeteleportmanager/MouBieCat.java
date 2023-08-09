@@ -11,6 +11,7 @@ import net.moubiecat.bungeeteleportmanager.listener.PlayerListener;
 import net.moubiecat.bungeeteleportmanager.menu.HistoryMenu;
 import net.moubiecat.bungeeteleportmanager.settings.ConfigYaml;
 import net.moubiecat.bungeeteleportmanager.settings.ConnectionYaml;
+import net.moubiecat.bungeeteleportmanager.settings.HistoryInventoryYaml;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -38,6 +39,7 @@ public final class MouBieCat extends JavaPlugin {
         // 其它注入依賴
         INJECT_REGISTRATION.register(MouBieCat.class, this);
         INJECT_REGISTRATION.register(ConfigYaml.class, new ConfigYaml(this));
+        INJECT_REGISTRATION.register(HistoryInventoryYaml.class, new HistoryInventoryYaml(this));
         INJECT_REGISTRATION.register(HistoryTable.class, new HistoryTableImpl());
         INJECT_REGISTRATION.register(CacheManager.class, new CacheManager());
         INJECT_REGISTRATION.bindInjector();
@@ -55,10 +57,12 @@ public final class MouBieCat extends JavaPlugin {
     @Override
     public void onDisable() {
         InjectRegistration.INJECTOR.getInstance(ConfigYaml.class).save();
+        InjectRegistration.INJECTOR.getInstance(HistoryInventoryYaml.class).save();
     }
 
     public void onReload() {
         InjectRegistration.INJECTOR.getInstance(ConfigYaml.class).load();
+        InjectRegistration.INJECTOR.getInstance(HistoryInventoryYaml.class).load();
     }
 
     /**

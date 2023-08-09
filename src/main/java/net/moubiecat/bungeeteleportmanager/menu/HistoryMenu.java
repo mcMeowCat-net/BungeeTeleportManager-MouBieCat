@@ -1,10 +1,13 @@
 package net.moubiecat.bungeeteleportmanager.menu;
 
 import com.google.inject.Inject;
+import main.java.me.avankziar.general.object.ServerLocation;
+import main.java.me.avankziar.spigot.btm.BungeeTeleportManager;
 import net.moubiecat.bungeeteleportmanager.MouBieCat;
-import net.moubiecat.bungeeteleportmanager.data.cache.CacheData;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheManager;
 import net.moubiecat.bungeeteleportmanager.services.ItemService;
+import net.moubiecat.bungeeteleportmanager.services.LocationSerialization;
+import net.moubiecat.bungeeteleportmanager.settings.HistoryInventoryYaml;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -20,34 +23,22 @@ public final class HistoryMenu extends Menu {
     private final static NamespacedKey ACTION_KEY = new NamespacedKey(MouBieCat.getInstance(MouBieCat.class), "action");
 
     private final static int[] BORDER_SLOT = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 19, 20, 24, 25, 26};
-    private final static int PREVIOUS_PAGE_SLOT = 9;
-    private final static int NEXT_PAGE_SLOT = 17;
-    private final static int HISTORY_BUTTON_SLOTS = 7;
-
     private final ItemStack borderItem = ItemService.build(Material.BLACK_STAINED_GLASS_PANE)
             .name(" ")
             .build()
             .orElseThrow();
-    private final ItemStack previousItem = ItemService.build(Material.ARROW)
-            .name("§f<-")
-            .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, "previous")
-            .build()
-            .orElseThrow();
-    private final ItemStack nextItem = ItemService.build(Material.ARROW)
-            .name("§f->")
-            .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, "next")
-            .build()
-            .orElseThrow();
 
     private final CacheManager manager;
+    private final HistoryInventoryYaml inventoryYaml;
 
     /**
      * 建構子
      */
     @Inject
-    public HistoryMenu(@NotNull CacheManager manager) {
+    public HistoryMenu(@NotNull CacheManager manager, @NotNull HistoryInventoryYaml yaml) {
         super(MenuSize.THREE, "        §8 ▼ 玩家傳送歷史選單 ▼ ");
         this.manager = manager;
+        this.inventoryYaml = yaml;
     }
 
     /**
@@ -61,16 +52,13 @@ public final class HistoryMenu extends Menu {
         this.inventory.clear();
         // 設置選單邊框
         Arrays.stream(BORDER_SLOT).forEach(slot -> this.inventory.setItem(slot, this.borderItem));
-        // 設置翻頁按鈕
-        this.inventory.setItem(PREVIOUS_PAGE_SLOT, this.previousItem);
-        this.inventory.setItem(NEXT_PAGE_SLOT, this.nextItem);
         // 設置傳送歷史按鈕
         this.manager.getCacheData(view.getUniqueId())
                 .getData()
-                .stream()
-                .skip((long) (page - 1) * HISTORY_BUTTON_SLOTS)
-                .limit(HISTORY_BUTTON_SLOTS)
-                .forEach(history -> this.inventory.addItem(history.buildHistoryItemStack(view, ACTION_KEY)));
+                .forEach(history -> this.inventory.addItem(history.buildHistoryItemStack(
+                        ACTION_KEY,
+                        this.inventoryYaml.getHistoryDisplay(),
+                        this.inventoryYaml.getHistoryLore())));
     }
 
     /**
@@ -80,8 +68,7 @@ public final class HistoryMenu extends Menu {
      */
     @Override
     protected boolean hasNextPage(@NotNull Player player, int page) {
-        final CacheData cacheData = manager.getCacheData(player.getUniqueId());
-        return cacheData.getData().size() > page * HISTORY_BUTTON_SLOTS;
+        return false;
     }
 
     /**
@@ -105,10 +92,11 @@ public final class HistoryMenu extends Menu {
         if (action == null)
             return;
 
-        // 根據 Action 執行對應的動作
-        switch (action) {
-            case "previous" -> this.previous(player);
-            case "next" -> this.next(player);
+        try {
+            final LocationSerialization serialization = new LocationSerialization();
+            final ServerLocation serverLocation = serialization.deserialize(action);
+            BungeeTeleportManager.getPlugin().getTeleportHandler().tpPos(player, serverLocation);
+        } catch (final Exception ignored) {
         }
 
         // 更新選單

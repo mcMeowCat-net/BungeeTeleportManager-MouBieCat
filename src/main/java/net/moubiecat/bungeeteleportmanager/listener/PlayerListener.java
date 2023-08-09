@@ -2,11 +2,13 @@ package net.moubiecat.bungeeteleportmanager.listener;
 
 import com.google.inject.Inject;
 import main.java.me.avankziar.spigot.btm.BungeeTeleportManager;
+import net.moubiecat.bungeeteleportmanager.MouBieCat;
 import net.moubiecat.bungeeteleportmanager.data.HistoryData;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheData;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheManager;
 import net.moubiecat.bungeeteleportmanager.data.database.HistoryTable;
 import net.moubiecat.bungeeteleportmanager.settings.ConfigYaml;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public final class PlayerListener implements Listener {
+    private final MouBieCat plugin;
     private final HistoryTable database;
     private final CacheManager cacheManager;
     private final ConfigYaml config;
@@ -26,11 +29,14 @@ public final class PlayerListener implements Listener {
     /**
      * 建構子
      *
+     * @param plugin       插件
      * @param database     資料庫
      * @param cacheManager 快取管理器
+     * @param config       設定檔
      */
     @Inject
-    public PlayerListener(@NotNull HistoryTable database, @NotNull CacheManager cacheManager, @NotNull ConfigYaml config) {
+    public PlayerListener(@NotNull MouBieCat plugin, @NotNull HistoryTable database, @NotNull CacheManager cacheManager, @NotNull ConfigYaml config) {
+        this.plugin = plugin;
         this.database = database;
         this.cacheManager = cacheManager;
         this.config = config;
@@ -53,14 +59,6 @@ public final class PlayerListener implements Listener {
         if (this.config.getCauses().contains(cause.name())) {
             // 儲存傳送資訊
             final CacheData cacheData = this.cacheManager.getCacheData(player.getUniqueId());
-
-            final List<HistoryData> data = cacheData.getData();
-            // 是否已經超出最大傳送紀錄
-            if (data.size() >= this.config.MaxTeleportHistory()) {
-                // 移除到小於最大傳送紀錄
-                data.subList(this.config.MaxTeleportHistory() - 1, data.size()).clear();
-            }
-
             // 添加傳送資訊
             cacheData.addData(new HistoryData(
                     player.getUniqueId(),
@@ -78,19 +76,15 @@ public final class PlayerListener implements Listener {
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
         final Player player = event.getPlayer();
 
-        // 取得玩家傳送紀錄
-        final List<HistoryData> dataList = this.database.selectData(player.getUniqueId());
-
-        // 建立快取
-        final CacheData cacheData = new CacheData(player.getUniqueId());
-        // 排序傳送時間 TeleportHistoryData::getTime() 新 -> 舊，並添加到快取，只取 ::MaxTeleportHistory 個
-        dataList.stream()
-                .sorted((data1, data2) -> (int) (data2.getTime() - data1.getTime()))
-                .limit(this.config.MaxTeleportHistory())
-                .forEach(cacheData::addData);
-
-        // 儲存快取
-        this.cacheManager.addCacheData(player.getUniqueId(), cacheData);
+        // 延遲執行，避免資料庫連線問題
+        Bukkit.getScheduler().runTaskLaterAsynchronously(this.plugin, () -> {
+            final List<HistoryData> dataList = this.database.selectData(player.getUniqueId());
+            final CacheData cacheData = new CacheData(player.getUniqueId());
+            dataList.stream()
+                    .sorted((data1, data2) -> (int) (data2.getTime() - data1.getTime()))
+                    .forEach(cacheData::addData);
+            this.cacheManager.addCacheData(player.getUniqueId(), cacheData);
+        }, 5L);
     }
 
     /**
@@ -101,15 +95,12 @@ public final class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerQuit(@NotNull PlayerQuitEvent event) {
         final Player player = event.getPlayer();
-
         // 獲取快取
         final CacheData cacheData = this.cacheManager.getCacheData(player.getUniqueId());
-
         // 保存到資料庫，首先刪除資料庫中的資料
         this.database.deleteData(player.getUniqueId());
         // 將快取中的資料保存到資料庫
         cacheData.getData().forEach(this.database::insertData);
-
         // 移除快取
         this.cacheManager.removeCacheData(player.getUniqueId());
     }

@@ -1,12 +1,14 @@
 package net.moubiecat.bungeeteleportmanager.data;
 
+import main.java.me.avankziar.general.object.ServerLocation;
 import net.moubiecat.bungeeteleportmanager.services.ItemService;
+import net.moubiecat.bungeeteleportmanager.services.LocationSerialization;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -114,20 +116,33 @@ public final class HistoryData {
     /**
      * 建立物品堆
      *
+     * @param action  動作
+     * @param display 顯示名稱
+     * @param lore    說明
      * @return 物品堆
      */
-    public @NotNull ItemStack buildHistoryItemStack(@NotNull Player player, @NotNull NamespacedKey key) {
-        // 建立基礎頻道物品
+    @SuppressWarnings("ConstantConditions")
+    public @NotNull ItemStack buildHistoryItemStack(@NotNull NamespacedKey action, @NotNull String display, @NotNull List<String> lore) {
+        // 替換佔位符
+        lore.replaceAll(s -> s.replace("{time}", new java.text.SimpleDateFormat("yyyy 年 MM 月 dd 日 HH 時 mm 分 ss 秒").format(this.time)));
+        lore.replaceAll(s -> s.replace("{server}", this.server));
+        lore.replaceAll(s -> s.replace("{cause}", this.cause.name()));
+        lore.replaceAll(s -> s.replace("{from}", this.fromLocation.getX() + ", " + this.fromLocation.getY() + ", " + this.fromLocation.getZ()));
+        lore.replaceAll(s -> s.replace("{to}", this.toLocation.getX() + ", " + this.toLocation.getY() + ", " + this.toLocation.getZ()));
+
+        // 序列化
+        final LocationSerialization serialization = new LocationSerialization();
+        final ServerLocation location = new ServerLocation(
+                this.server,
+                this.fromLocation.getWorld().getName(),
+                this.fromLocation.getX(), this.fromLocation.getY(), this.fromLocation.getZ(),
+                this.fromLocation.getYaw(), this.fromLocation.getPitch());
+
+        // 建立物品堆
         return ItemService.build(Material.ENDER_PEARL)
-                .name("&6傳送點紀錄")
-                .lore(List.of(
-                        "",
-                        "  &8傳送時間： " + new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(this.time),
-                        "  &8分流伺服： " + this.server,
-                        "  &8傳送原因： " + this.cause.name(),
-                        "  &8來源位置： " + this.fromLocation.getX() + ", " + this.fromLocation.getY() + ", " + this.fromLocation.getZ(),
-                        "  &8目的位置： " + this.toLocation.getX() + ", " + this.toLocation.getY() + ", " + this.toLocation.getZ(),
-                        ""))
+                .name(display)
+                .lore(lore)
+                .addPersistentDataContainer(action, PersistentDataType.STRING, serialization.serialize(location))
                 .build()
                 .orElse(new ItemStack(Material.AIR));
     }

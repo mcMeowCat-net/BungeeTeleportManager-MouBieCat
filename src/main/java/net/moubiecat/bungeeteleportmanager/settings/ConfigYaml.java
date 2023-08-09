@@ -16,10 +16,6 @@ public final class ConfigYaml extends Yaml {
         super(plugin, "config.yml");
     }
 
-    public int MaxTeleportHistory() {
-        return this.configuration.getInt("MaxTeleportHistory");
-    }
-
     @NotNull
     public List<String> getCauses() {
         return this.configuration.getStringList("LogCauses");
