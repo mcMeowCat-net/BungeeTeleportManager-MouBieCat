@@ -6,8 +6,9 @@ import main.java.me.avankziar.spigot.btm.BungeeTeleportManager;
 import net.moubiecat.bungeeteleportmanager.MouBieCat;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheManager;
 import net.moubiecat.bungeeteleportmanager.services.ItemService;
-import net.moubiecat.bungeeteleportmanager.services.LocationSerialization;
+import net.moubiecat.bungeeteleportmanager.services.LocationService;
 import net.moubiecat.bungeeteleportmanager.settings.HistoryInventoryYaml;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -28,6 +29,14 @@ public final class HistoryMenu extends Menu {
             .build()
             .orElseThrow();
 
+    private final static int SERVER_SLOT = 21;
+    private final static int SPAWN_SLOT = 22;
+    private final static int BACK_SLOT = 23;
+
+    private final ItemStack serverItem;
+    private final ItemStack spawnItem;
+    private final ItemStack backItem;
+
     private final CacheManager manager;
     private final HistoryInventoryYaml inventoryYaml;
 
@@ -36,9 +45,24 @@ public final class HistoryMenu extends Menu {
      */
     @Inject
     public HistoryMenu(@NotNull CacheManager manager, @NotNull HistoryInventoryYaml yaml) {
-        super(MenuSize.THREE, "        §8 ▼ 玩家傳送歷史選單 ▼ ");
+        super(MenuSize.THREE, "        §8 ▼ 玩家傳送歷史選單 ▼");
         this.manager = manager;
         this.inventoryYaml = yaml;
+        serverItem = ItemService.build(Material.NETHER_STAR)
+                .name(yaml.getServerDisplay())
+                .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, yaml.getServerCommand())
+                .build()
+                .orElseThrow();
+        spawnItem = ItemService.build(Material.BEACON)
+                .name(yaml.getSpawnDisplay())
+                .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, yaml.getSpawnCommand())
+                .build()
+                .orElseThrow();
+        backItem = ItemService.build(Material.ENDER_PEARL)
+                .name(yaml.getBackDisplay())
+                .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, yaml.getBackCommand())
+                .build()
+                .orElseThrow();
     }
 
     /**
@@ -52,6 +76,12 @@ public final class HistoryMenu extends Menu {
         this.inventory.clear();
         // 設置選單邊框
         Arrays.stream(BORDER_SLOT).forEach(slot -> this.inventory.setItem(slot, this.borderItem));
+        // 設置伺服器傳送按鈕
+        this.inventory.setItem(SERVER_SLOT, this.serverItem);
+        // 設置重生點傳送按鈕
+        this.inventory.setItem(SPAWN_SLOT, this.spawnItem);
+        // 設置返回按鈕
+        this.inventory.setItem(BACK_SLOT, this.backItem);
         // 設置傳送歷史按鈕
         this.manager.getCacheData(view.getUniqueId())
                 .getData()
@@ -84,6 +114,8 @@ public final class HistoryMenu extends Menu {
         // 獲取點擊的物品
         final Player player = (Player) event.getWhoClicked();
         final ItemStack currentItem = event.getCurrentItem();
+        final int slot = event.getSlot();
+
         if (currentItem == null || currentItem.getItemMeta() == null)
             return;
         // 獲取物品的 Action
@@ -92,11 +124,17 @@ public final class HistoryMenu extends Menu {
         if (action == null)
             return;
 
-        try {
-            final LocationSerialization serialization = new LocationSerialization();
-            final ServerLocation serverLocation = serialization.deserialize(action);
-            BungeeTeleportManager.getPlugin().getTeleportHandler().tpPos(player, serverLocation);
-        } catch (final Exception ignored) {
+        switch (slot) {
+            case SERVER_SLOT, SPAWN_SLOT, BACK_SLOT -> Bukkit.dispatchCommand(player, action);
+            default -> {
+                try {
+                    // 解析 Action Gson 格式
+                    final LocationService locationService = new LocationService();
+                    final ServerLocation serverLocation = locationService.deserialize(action);
+                    BungeeTeleportManager.getPlugin().getTeleportHandler().sendTpPos(player, serverLocation);
+                } catch (final Exception ignored) {
+                }
+            }
         }
 
         // 更新選單

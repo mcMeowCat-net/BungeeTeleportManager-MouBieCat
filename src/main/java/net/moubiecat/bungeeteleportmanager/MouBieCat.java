@@ -4,13 +4,11 @@ import net.moubiecat.bungeeteleportmanager.data.cache.CacheManager;
 import net.moubiecat.bungeeteleportmanager.data.database.HistoryTable;
 import net.moubiecat.bungeeteleportmanager.data.database.HistoryTableImpl;
 import net.moubiecat.bungeeteleportmanager.data.database.handler.LocationTypeHandler;
-import net.moubiecat.bungeeteleportmanager.data.database.handler.TeleportCauseTypeHandler;
 import net.moubiecat.bungeeteleportmanager.data.database.handler.UUIDTypeHandler;
 import net.moubiecat.bungeeteleportmanager.listener.InventoryListener;
 import net.moubiecat.bungeeteleportmanager.listener.PlayerListener;
 import net.moubiecat.bungeeteleportmanager.menu.HistoryMenu;
 import net.moubiecat.bungeeteleportmanager.settings.ConfigYaml;
-import net.moubiecat.bungeeteleportmanager.settings.ConnectionYaml;
 import net.moubiecat.bungeeteleportmanager.settings.HistoryInventoryYaml;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.bukkit.Bukkit;
@@ -18,7 +16,6 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,13 +26,12 @@ public final class MouBieCat extends JavaPlugin {
     private static final DatabaseRegistration DATABASE_REGISTRATION = new DatabaseRegistration();
 
     @Override
-    public void onLoad() {
+    public void onEnable() {
         // 資料庫依賴
         DATABASE_REGISTRATION.registerTypeHandler(UUID.class, UUIDTypeHandler.class);
-        DATABASE_REGISTRATION.registerTypeHandler(PlayerTeleportEvent.TeleportCause.class, TeleportCauseTypeHandler.class);
         DATABASE_REGISTRATION.registerTypeHandler(Location.class, LocationTypeHandler.class);
         DATABASE_REGISTRATION.registerMapper(HistoryTable.class);
-        DATABASE_REGISTRATION.buildSqlSessionFactory(new ConnectionYaml(this));
+        DATABASE_REGISTRATION.buildSqlSessionFactory();
         // 其它注入依賴
         INJECT_REGISTRATION.register(MouBieCat.class, this);
         INJECT_REGISTRATION.register(ConfigYaml.class, new ConfigYaml(this));
@@ -43,10 +39,7 @@ public final class MouBieCat extends JavaPlugin {
         INJECT_REGISTRATION.register(HistoryTable.class, new HistoryTableImpl());
         INJECT_REGISTRATION.register(CacheManager.class, new CacheManager());
         INJECT_REGISTRATION.bindInjector();
-    }
 
-    @Override
-    public void onEnable() {
         // 創建 MySQL 資料表
         InjectRegistration.INJECTOR.getInstance(HistoryTable.class).createTable();
         // 註冊事件
@@ -110,6 +103,7 @@ public final class MouBieCat extends JavaPlugin {
             sender.sendMessage("§6The plugin BungeeTeleportManager-MouBieCat has been reloaded.");
             return true;
         }
+
         return false;
     }
 }

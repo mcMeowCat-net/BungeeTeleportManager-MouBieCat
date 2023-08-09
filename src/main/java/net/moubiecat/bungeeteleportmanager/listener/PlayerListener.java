@@ -61,9 +61,7 @@ public final class PlayerListener implements Listener {
             final CacheData cacheData = this.cacheManager.getCacheData(player.getUniqueId());
             // 添加傳送資訊
             cacheData.addData(new HistoryData(
-                    player.getUniqueId(),
-                    BungeeTeleportManager.getPlugin().getServername(),
-                    cause, from, to));
+                    player.getUniqueId(), BungeeTeleportManager.getPlugin().getServername(), from, to));
         }
     }
 

@@ -5,7 +5,7 @@ import main.java.me.avankziar.general.object.ServerLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class LocationSerialization {
+public final class LocationService {
     private final Gson gson = new Gson();
 
     /**

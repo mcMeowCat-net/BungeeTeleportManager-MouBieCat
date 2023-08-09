@@ -1,14 +1,3 @@
 LogCauses:
   - "COMMAND"
   - "PLUGIN"
-
-CauseName:
-  CHORUS_FRUIT: "Chorus Fruit"
-  DISMOUNT: "Dismount"
-  END_GATEWAY: "End Gateway"
-  END_PORTAL: "End Portal"
-  ENDER_PEARL: "Ender Pearl"
-  EXIT_BED: "Exit Bed"
-  NETHER_PORTAL: "Nether Portal"
-  SPECTATE: "Spectate"
-  UNKNOWN: "Unknown"

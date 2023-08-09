@@ -1,8 +1,0 @@
-Mysql:
-  Host: localhost
-  Port: 3306
-  DatabaseName: BungeeTeleportManager
-  User: root
-  Password: password
-  SSLEnabled: false
-  AutoReconnect: false

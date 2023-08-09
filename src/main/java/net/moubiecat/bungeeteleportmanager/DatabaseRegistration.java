@@ -1,12 +1,13 @@
 package net.moubiecat.bungeeteleportmanager;
 
-import net.moubiecat.bungeeteleportmanager.settings.ConnectionYaml;
+import main.java.me.avankziar.spigot.btm.BungeeTeleportManager;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import javax.sql.DataSource;
@@ -43,14 +44,15 @@ public final class DatabaseRegistration {
      * 綁定 SQL 會話工廠
      */
 
-    public void buildSqlSessionFactory(@NotNull ConnectionYaml connection) {
-        final String host = connection.getHost();
-        final int port = connection.getPort();
-        final String user = connection.getUser();
-        final String password = connection.getPassword();
-        final String database = connection.getDatabase();
-        final boolean sslEnabled = connection.getSSLEnabled();
-        final boolean autoReconnect = connection.getAutoReconnect();
+    public void buildSqlSessionFactory() {
+        final YamlConfiguration config = BungeeTeleportManager.getPlugin().getYamlHandler().getConfig();
+        final String host = config.getString("Mysql.Host");
+        final int port = config.getInt("Mysql.Port", 3306);
+        final String database = config.getString("Mysql.DatabaseName");
+        final String user = config.getString("Mysql.User");
+        final String password = config.getString("Mysql.Password");
+        final boolean autoReconnect = config.getBoolean("Mysql.AutoReconnect", false);
+        final boolean sslEnabled = config.getBoolean("Mysql.SSLEnabled", false);
         // 建立資料源
         final DataSource dataSource = new PooledDataSource(
                 "com.mysql.cj.jdbc.Driver",

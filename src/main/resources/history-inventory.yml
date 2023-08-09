@@ -4,8 +4,19 @@ HistoryItem:
     - ""
     - "  &8傳送時間： {time}"
     - "  &8分流伺服： {server}"
-    - "  &8傳送原因： {cause}"
     - "  &8來源位置： {from}"
     - "  &8目的位置： {to}"
     - ""
     - "&9點擊傳送到該歷史位置。"
+
+ServerItem:
+  Command: "server"
+  Display: "&7▶ &6分流伺服"
+
+SpawnItem:
+  Command: "spawn"
+  Display: "&7▶ &6返回重生點"
+
+BackItem:
+  Command: "back"
+  Display: "&7▶ &6返回上一個位置"
