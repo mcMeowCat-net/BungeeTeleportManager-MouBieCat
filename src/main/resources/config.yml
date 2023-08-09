@@ -1,4 +1,4 @@
-MaxTeleportHistory: 5
+MaxTeleportHistory: 7
 
 LogCauses:
   - "COMMAND"
