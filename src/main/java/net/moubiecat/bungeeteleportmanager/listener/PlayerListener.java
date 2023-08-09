@@ -2,10 +2,10 @@ package net.moubiecat.bungeeteleportmanager.listener;
 
 import com.google.inject.Inject;
 import main.java.me.avankziar.spigot.btm.BungeeTeleportManager;
+import net.moubiecat.bungeeteleportmanager.data.HistoryData;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheData;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheManager;
-import net.moubiecat.bungeeteleportmanager.data.TeleportHistoryData;
-import net.moubiecat.bungeeteleportmanager.data.database.TeleportHistoryTable;
+import net.moubiecat.bungeeteleportmanager.data.database.HistoryTable;
 import net.moubiecat.bungeeteleportmanager.settings.ConfigYaml;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public final class PlayerListener implements Listener {
-    private final TeleportHistoryTable database;
+    private final HistoryTable database;
     private final CacheManager cacheManager;
     private final ConfigYaml config;
 
@@ -30,7 +30,7 @@ public final class PlayerListener implements Listener {
      * @param cacheManager 快取管理器
      */
     @Inject
-    public PlayerListener(@NotNull TeleportHistoryTable database, @NotNull CacheManager cacheManager, @NotNull ConfigYaml config) {
+    public PlayerListener(@NotNull HistoryTable database, @NotNull CacheManager cacheManager, @NotNull ConfigYaml config) {
         this.database = database;
         this.cacheManager = cacheManager;
         this.config = config;
@@ -54,7 +54,7 @@ public final class PlayerListener implements Listener {
             // 儲存傳送資訊
             final CacheData cacheData = this.cacheManager.getCacheData(player.getUniqueId());
 
-            final List<TeleportHistoryData> data = cacheData.getData();
+            final List<HistoryData> data = cacheData.getData();
             // 是否已經超出最大傳送紀錄
             if (data.size() >= this.config.MaxTeleportHistory()) {
                 // 移除到小於最大傳送紀錄
@@ -62,7 +62,7 @@ public final class PlayerListener implements Listener {
             }
 
             // 添加傳送資訊
-            cacheData.addData(new TeleportHistoryData(
+            cacheData.addData(new HistoryData(
                     player.getUniqueId(),
                     BungeeTeleportManager.getPlugin().getServername(),
                     cause, from, to));
@@ -79,7 +79,7 @@ public final class PlayerListener implements Listener {
         final Player player = event.getPlayer();
 
         // 取得玩家傳送紀錄
-        final List<TeleportHistoryData> dataList = this.database.selectTeleportInformation(player.getUniqueId());
+        final List<HistoryData> dataList = this.database.selectData(player.getUniqueId());
 
         // 建立快取
         final CacheData cacheData = new CacheData(player.getUniqueId());
