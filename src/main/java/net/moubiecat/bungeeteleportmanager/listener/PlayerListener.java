@@ -21,26 +21,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public final class PlayerListener implements Listener {
-    private final MouBieCat plugin;
-    private final HistoryTable database;
-    private final CacheManager cacheManager;
-    private final ConfigYaml config;
-
-    /**
-     * 建構子
-     *
-     * @param plugin       插件
-     * @param database     資料庫
-     * @param cacheManager 快取管理器
-     * @param config       設定檔
-     */
-    @Inject
-    public PlayerListener(@NotNull MouBieCat plugin, @NotNull HistoryTable database, @NotNull CacheManager cacheManager, @NotNull ConfigYaml config) {
-        this.plugin = plugin;
-        this.database = database;
-        this.cacheManager = cacheManager;
-        this.config = config;
-    }
+    private @Inject MouBieCat plugin;
+    private @Inject ConfigYaml config;
+    private @Inject HistoryTable database;
+    private @Inject CacheManager cacheManager;
 
     /**
      * 玩家傳送事件

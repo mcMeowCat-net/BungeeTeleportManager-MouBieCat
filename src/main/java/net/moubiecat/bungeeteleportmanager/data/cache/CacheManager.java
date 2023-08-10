@@ -16,7 +16,7 @@ public final class CacheManager {
      * @param data 傳送資料
      */
     public void addCacheData(@NotNull UUID uuid, @NotNull CacheData data) {
-        this.cacheData.put(uuid, data);
+        this.cacheData.putIfAbsent(uuid, data);
     }
 
     /**

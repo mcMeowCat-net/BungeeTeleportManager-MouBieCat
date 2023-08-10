@@ -1,0 +1,29 @@
+Title: "        §8 ▼ 玩家家點紀錄選單 ▼"
+
+HomeItem:
+  Display: "&6家點紀錄"
+  Lore:
+    - ""
+    - "  &8紀錄名稱： &7{name}"
+    - "  &8所在伺服： &7{server}"
+    - "  &8紀錄位置： &7{location}"
+    - ""
+    - "&9點擊選擇編輯這個家點。"
+
+TeleportItem:
+  Material: "ENDER_PEARL"
+  Display: "&6家點紀錄"
+  Lore:
+    - ""
+    - "  &8目前所選： &7{name}"
+    - ""
+    - "&9點擊來傳送到這個紀錄點。"
+
+DeleteItem:
+  Material: "TNT"
+  Display: "&6家點紀錄"
+  Lore:
+    - ""
+    - "  &8目前所選： &7{name}"
+    - ""
+    - "&9點擊來刪除這個紀錄點。"

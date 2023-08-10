@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import main.java.me.avankziar.general.object.ServerLocation;
 import main.java.me.avankziar.spigot.btm.BungeeTeleportManager;
 import net.moubiecat.bungeeteleportmanager.MouBieCat;
+import net.moubiecat.bungeeteleportmanager.data.HistoryData;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheManager;
 import net.moubiecat.bungeeteleportmanager.services.ItemService;
 import net.moubiecat.bungeeteleportmanager.services.LocationService;
@@ -16,53 +17,69 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.List;
 
 public final class HistoryMenu extends Menu {
-    private final static NamespacedKey ACTION_KEY = new NamespacedKey(MouBieCat.getInstance(MouBieCat.class), "action");
+    // 格式化工具
+    private static final DecimalFormat FORMAT = new DecimalFormat("#0.0");
+    private static final SimpleDateFormat DATA_FORMAT = new SimpleDateFormat("yyyy 年 MM 月 dd 日 HH 時 mm 分 ss 秒");
 
-    private final static int[] BORDER_SLOT = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 19, 20, 24, 25, 26};
-    private final ItemStack borderItem = ItemService.build(Material.BLACK_STAINED_GLASS_PANE)
+    // 按鈕動作
+    private static final NamespacedKey ACTION_KEY = new NamespacedKey(JavaPlugin.getPlugin(MouBieCat.class), "menu_action");
+
+    // 邊框格子
+    private static final int[] BORDER_SLOT = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 19, 20, 24, 25, 26};
+    private static final ItemStack BORDER_ITEM = ItemService.build(Material.BLACK_STAINED_GLASS_PANE)
             .name(" ")
             .build()
             .orElseThrow();
 
-    private final static int SERVER_SLOT = 21;
-    private final static int SPAWN_SLOT = 22;
-    private final static int BACK_SLOT = 23;
+    // 可用格子
+    private static final int[] AVAILABLE_SLOT = {10, 11, 12, 13, 14, 15, 16};
 
+    // 其它按鈕格子
+    private static final int SERVER_SLOT = 21;
     private final ItemStack serverItem;
+    private static final int SPAWN_SLOT = 22;
     private final ItemStack spawnItem;
+    private static final int BACK_SLOT = 23;
     private final ItemStack backItem;
 
-    private final CacheManager manager;
-    private final HistoryInventoryYaml inventoryYaml;
+    // 玩家資料相關管理器
+    private @Inject CacheManager manager;
+    private @Inject HistoryInventoryYaml yaml;
 
     /**
      * 建構子
+     *
+     * @param size  選單大小
+     * @param title 選單標題
      */
     @Inject
-    public HistoryMenu(@NotNull CacheManager manager, @NotNull HistoryInventoryYaml yaml) {
-        super(MenuSize.THREE, "        §8 ▼ 玩家傳送歷史選單 ▼");
-        this.manager = manager;
-        this.inventoryYaml = yaml;
-        serverItem = ItemService.build(Material.NETHER_STAR)
-                .name(yaml.getServerDisplay())
-                .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, yaml.getServerCommand())
-                .build()
-                .orElseThrow();
-        spawnItem = ItemService.build(Material.BEACON)
-                .name(yaml.getSpawnDisplay())
-                .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, yaml.getSpawnCommand())
-                .build()
-                .orElseThrow();
-        backItem = ItemService.build(Material.ENDER_PEARL)
-                .name(yaml.getBackDisplay())
-                .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, yaml.getBackCommand())
-                .build()
-                .orElseThrow();
+    public HistoryMenu(@NotNull HistoryInventoryYaml yaml) {
+        super(MenuSize.THREE, yaml.getTitle());
+        this.yaml = yaml;
+        serverItem = ItemService.build(yaml.getServerItemMaterial())
+                .name(yaml.getServerItemDisplay())
+                .lore(yaml.getServerItemLore())
+                .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, yaml.getServerItemCommand())
+                .build().orElseThrow();
+        spawnItem = ItemService.build(yaml.getSpawnItemMaterial())
+                .name(yaml.getSpawnItemDisplay())
+                .lore(yaml.getSpawnItemLore())
+                .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, yaml.getSpawnItemCommand())
+                .build().orElseThrow();
+        backItem = ItemService.build(yaml.getBackItemMaterial())
+                .name(yaml.getBackItemDisplay())
+                .lore(yaml.getBackItemLore())
+                .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, yaml.getBackItemCommand())
+                .build().orElseThrow();
     }
 
     /**
@@ -75,25 +92,44 @@ public final class HistoryMenu extends Menu {
     protected void initialize(@NotNull Player view, int page) {
         this.inventory.clear();
         // 設置選單邊框
-        Arrays.stream(BORDER_SLOT).forEach(slot -> this.inventory.setItem(slot, this.borderItem));
-        // 設置伺服器傳送按鈕
+        Arrays.stream(BORDER_SLOT).forEach(slot -> this.inventory.setItem(slot, BORDER_ITEM));
+        // 設置其它按鈕
         this.inventory.setItem(SERVER_SLOT, this.serverItem);
-        // 設置重生點傳送按鈕
         this.inventory.setItem(SPAWN_SLOT, this.spawnItem);
-        // 設置返回按鈕
         this.inventory.setItem(BACK_SLOT, this.backItem);
-        // 設置傳送歷史按鈕
-        this.manager.getCacheData(view.getUniqueId())
-                .getData()
-                .forEach(history -> this.inventory.addItem(history.buildHistoryItemStack(
-                        ACTION_KEY,
-                        this.inventoryYaml.getHistoryDisplay(),
-                        this.inventoryYaml.getHistoryLore())));
+        // 設置玩家傳送歷史
+        try {
+            final List<HistoryData> dataList = this.manager.getCacheData(view.getUniqueId()).getData();
+            for (int index = 0; index < AVAILABLE_SLOT.length; index++) {
+                final int slot = AVAILABLE_SLOT[index];
+                final HistoryData data = dataList.get(index + (page - 1) * AVAILABLE_SLOT.length);
+                // 獲取配置檔資料
+                final Material material = this.yaml.getHistoryItemMaterial();
+                final String display = this.yaml.getHistoryItemDisplay();
+                final List<String> lore = this.yaml.getHistoryItemLore();
+                // 轉換佔位符資訊
+                lore.replaceAll(line -> line.replace("{time}", DATA_FORMAT.format(data.getTime()))
+                        .replace("{server}", data.getServer())
+                        .replace("{from}", FORMAT.format(data.getFrom().getX()) + ", " + FORMAT.format(data.getFrom().getY()) + ", " + FORMAT.format(data.getFrom().getZ()))
+                        .replace("{to}", FORMAT.format(data.getTo().getX()) + ", " + FORMAT.format(data.getTo().getY()) + ", " + FORMAT.format(data.getTo().getZ())));
+                // 轉換為伺服器位置
+                final ServerLocation serverLocation = LocationService.covert(data.getServer(), data.getFrom());
+                // 設置物品
+                this.inventory.setItem(slot, ItemService.build(material)
+                        .name(display)
+                        .lore(lore)
+                        .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, LocationService.serialize(serverLocation))
+                        .build().orElseThrow());
+            }
+        } catch (final IndexOutOfBoundsException ignored) {
+        }
     }
 
     /**
      * 是否有下一頁
      *
+     * @param player
+     * @param page
      * @return 是否有下一頁
      */
     @Override
@@ -101,43 +137,26 @@ public final class HistoryMenu extends Menu {
         return false;
     }
 
-    /**
-     * InventoryClickEvent 處理
-     *
-     * @param event 事件
-     */
     @Override
+    @SuppressWarnings("ConstantConditions")
     public void onClick(@NotNull InventoryClickEvent event) {
-        // 取消點擊事件
         event.setCancelled(true);
-
-        // 獲取點擊的物品
-        final Player player = (Player) event.getWhoClicked();
-        final ItemStack currentItem = event.getCurrentItem();
         final int slot = event.getSlot();
-
-        if (currentItem == null || currentItem.getItemMeta() == null)
-            return;
-        // 獲取物品的 Action
+        final ItemStack currentItem = event.getCurrentItem();
         final ItemMeta itemMeta = currentItem.getItemMeta();
         final String action = itemMeta.getPersistentDataContainer().get(ACTION_KEY, PersistentDataType.STRING);
         if (action == null)
             return;
 
         switch (slot) {
-            case SERVER_SLOT, SPAWN_SLOT, BACK_SLOT -> Bukkit.dispatchCommand(player, action);
+            case SERVER_SLOT, SPAWN_SLOT, BACK_SLOT -> Bukkit.dispatchCommand(event.getWhoClicked(), action);
             default -> {
                 try {
-                    // 解析 Action Gson 格式
-                    final LocationService locationService = new LocationService();
-                    final ServerLocation serverLocation = locationService.deserialize(action);
-                    BungeeTeleportManager.getPlugin().getTeleportHandler().sendTpPos(player, serverLocation);
+                    final ServerLocation serverLocation = LocationService.deserialize(action);
+                    BungeeTeleportManager.getPlugin().getTeleportHandler().sendTpPos((Player) event.getWhoClicked(), serverLocation);
                 } catch (final Exception ignored) {
                 }
             }
         }
-
-        // 更新選單
-        this.refresh(player);
     }
 }

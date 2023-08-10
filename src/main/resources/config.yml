@@ -1,3 +1,8 @@
+# History Teleport
 LogCauses:
   - "COMMAND"
   - "PLUGIN"
+
+# Homes Command Override
+CommandHomes:
+  - "homes"

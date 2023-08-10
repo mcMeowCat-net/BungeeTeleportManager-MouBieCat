@@ -1,5 +1,6 @@
 package net.moubiecat.bungeeteleportmanager.settings;
 
+import org.bukkit.Material;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,43 +16,67 @@ public final class HistoryInventoryYaml extends Yaml {
         super(plugin, "history-inventory.yml");
     }
 
-    @NotNull
-    public String getHistoryDisplay() {
-        return this.configuration.getString("HistoryItem.Display", "§6History Display Name");
+    public @NotNull String getTitle() {
+        return this.configuration.getString("Title", "");
     }
 
-    @NotNull
-    public List<String> getHistoryLore() {
+    public @NotNull Material getHistoryItemMaterial() {
+        return Material.valueOf(this.configuration.getString("HistoryItem.Material", "AIR"));
+    }
+
+    public @NotNull String getHistoryItemDisplay() {
+        return this.configuration.getString("HistoryItem.Display", "");
+    }
+
+    public @NotNull List<String> getHistoryItemLore() {
         return this.configuration.getStringList("HistoryItem.Lore");
     }
 
-    @NotNull
-    public String getServerCommand() {
-        return this.configuration.getString("ServerItem.Command", "server");
+    public @NotNull Material getServerItemMaterial() {
+        return Material.valueOf(this.configuration.getString("ServerItem.Material", "AIR"));
     }
 
-    @NotNull
-    public String getServerDisplay() {
-        return this.configuration.getString("ServerItem.Display", "§6Server Display Name");
+    public @NotNull String getServerItemDisplay() {
+        return this.configuration.getString("ServerItem.Display", "");
     }
 
-    @NotNull
-    public String getSpawnCommand() {
-        return this.configuration.getString("SpawnItem.Command", "spawn");
+    public @NotNull List<String> getServerItemLore() {
+        return this.configuration.getStringList("ServerItem.Lore");
     }
 
-    @NotNull
-    public String getSpawnDisplay() {
-        return this.configuration.getString("SpawnItem.Display", "§6Spawn Display Name");
+    public @NotNull String getServerItemCommand() {
+        return this.configuration.getString("ServerItem.Command", "");
     }
 
-    @NotNull
-    public String getBackCommand() {
-        return this.configuration.getString("BackItem.Command", "back");
+    public @NotNull Material getSpawnItemMaterial() {
+        return Material.valueOf(this.configuration.getString("SpawnItem.Material", "AIR"));
     }
 
-    @NotNull
-    public String getBackDisplay() {
-        return this.configuration.getString("BackItem.Display", "§6Back Display Name");
+    public @NotNull String getSpawnItemDisplay() {
+        return this.configuration.getString("SpawnItem.Display", "");
+    }
+
+    public @NotNull List<String> getSpawnItemLore() {
+        return this.configuration.getStringList("SpawnItem.Lore");
+    }
+
+    public @NotNull String getSpawnItemCommand() {
+        return this.configuration.getString("SpawnItem.Command", "");
+    }
+
+    public @NotNull Material getBackItemMaterial() {
+        return Material.valueOf(this.configuration.getString("BackItem.Material", "AIR"));
+    }
+
+    public @NotNull String getBackItemDisplay() {
+        return this.configuration.getString("BackItem.Display", "");
+    }
+
+    public @NotNull List<String> getBackItemLore() {
+        return this.configuration.getStringList("BackItem.Lore");
+    }
+
+    public @NotNull String getBackItemCommand() {
+        return this.configuration.getString("BackItem.Command", "");
     }
 }

@@ -1,4 +1,7 @@
+Title: "        §8 ▼ 玩家傳送歷史選單 ▼"
+
 HistoryItem:
+  Material: "ENDER_EYE"
   Display: "&7▶ &6傳送歷史紀錄"
   Lore:
     - ""
@@ -13,12 +16,32 @@ HistoryItem:
 
 ServerItem:
   Command: "server"
+  Material: "NETHER_STAR"
   Display: "&6分流伺服"
+  Lore:
+    - ""
+    - "  &8目前位於： &7第一分流"
+    - ""
+    - "&9點擊來切換分流伺服器。"
 
 SpawnItem:
   Command: "spawn"
+  Material: "BEACON"
   Display: "&6返回重生點"
+  Lore:
+    - ""
+    - "  &8使用指令： &7/spawn"
+    - ""
+    - "&9點擊來回到伺服器重生點。"
 
 BackItem:
   Command: "back"
+  Material: "ENDER_PEARL"
   Display: "&6返回上一個位置"
+  Lore:
+    - ""
+    - "  &8使用指令： &7/back"
+    - ""
+    - "  &7可能因為傳送而原有位置被覆蓋。"
+    - ""
+    - "&9點擊來回到上一個傳送的點。"
