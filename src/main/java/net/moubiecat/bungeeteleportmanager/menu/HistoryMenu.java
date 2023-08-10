@@ -51,7 +51,6 @@ public final class HistoryMenu extends Menu {
 
     // 玩家資料相關管理器
     private @Inject BungeeTeleportManager teleportManager;
-
     private @Inject CacheManager manager;
     private @Inject HistoryInventoryYaml yaml;
 

@@ -57,7 +57,6 @@ public final class HomeMenu extends Menu {
 
     private @Inject MouBieCat plugin;
     private @Inject BungeeTeleportManager teleportManager;
-
     private @Inject HomeInventoryYaml yaml;
 
     private String currentHome = String.valueOf(0);

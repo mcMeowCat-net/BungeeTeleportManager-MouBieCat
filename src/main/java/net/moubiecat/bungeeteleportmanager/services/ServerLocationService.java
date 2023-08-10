@@ -3,7 +3,6 @@ package net.moubiecat.bungeeteleportmanager.services;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import main.java.me.avankziar.general.object.ServerLocation;
@@ -57,8 +56,8 @@ public final class ServerLocationService {
         private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#0.0");
         private static final String FORMAT_PATTERN_SERVER = "§e%s §8- §7%s§8, §7%s§8, §7%s§r";
         private static final String FORMAT_PATTERN_LOCATION = "§e%s §8- §7%s§8, §7%s§8, §7%s§r";
-        private @Inject
-        @Named("Multiverse-Core") MultiverseCore multiverseCore;
+
+        private @Inject MultiverseCore multiverseCore;
 
         /**
          * 格式化
