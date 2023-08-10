@@ -1,15 +1,16 @@
 package net.moubiecat.bungeeteleportmanager.listener;
 
 import com.google.inject.Inject;
+import main.java.me.avankziar.general.object.ServerLocation;
 import main.java.me.avankziar.spigot.btm.BungeeTeleportManager;
 import net.moubiecat.bungeeteleportmanager.MouBieCat;
 import net.moubiecat.bungeeteleportmanager.data.HistoryData;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheData;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheManager;
 import net.moubiecat.bungeeteleportmanager.data.database.HistoryTable;
+import net.moubiecat.bungeeteleportmanager.services.ServerLocationService;
 import net.moubiecat.bungeeteleportmanager.settings.ConfigYaml;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -22,7 +23,10 @@ import java.util.List;
 
 public final class PlayerListener implements Listener {
     private @Inject MouBieCat plugin;
+    private @Inject BungeeTeleportManager teleportManager;
+
     private @Inject ConfigYaml config;
+
     private @Inject HistoryTable database;
     private @Inject CacheManager cacheManager;
 
@@ -33,19 +37,22 @@ public final class PlayerListener implements Listener {
      */
     @EventHandler
     public void onTeleportEvent(@NotNull PlayerTeleportEvent event) {
-        // 獲取傳送資訊
-        final Player player = event.getPlayer();
-        final PlayerTeleportEvent.TeleportCause cause = event.getCause();
-        final Location from = event.getFrom();
-        final Location to = event.getTo();
-
         // 過濾傳送原因、位置
-        if (this.config.getCauses().contains(cause.name())) {
-            // 儲存傳送資訊
+        if (this.config.getCauses().contains(event.getCause().name())) {
+            // 取得玩家資料
+            final Player player = event.getPlayer();
             final CacheData cacheData = this.cacheManager.getCacheData(player.getUniqueId());
-            // 添加傳送資訊
-            cacheData.addData(new HistoryData(
-                    player.getUniqueId(), BungeeTeleportManager.getPlugin().getServername(), from, to));
+
+            // 轉換為伺服器位置
+            // 事實上 Servername 是多餘的，因為 BungeeCord 跨分流時並不會觸發該該事件。
+            // 且 BungeeTeleportManager 也沒有事件可以監聽 BungeeCord 傳送事件。
+            // 我只是為了將來而考量，目前暫且不是太重要的事情。
+            final String servername = teleportManager.getServername();
+            final ServerLocation fromLocation = ServerLocationService.covert(servername, event.getFrom());
+            final ServerLocation toLocation = ServerLocationService.covert(servername, event.getTo());
+
+            // 添加資料
+            cacheData.addData(new HistoryData(player.getUniqueId(), fromLocation, toLocation));
         }
     }
 

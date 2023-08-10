@@ -1,58 +1,60 @@
-Title: "        §8 ▼ 玩家傳送歷史選單 ▼"
+Title: '        §8 ▼ 玩家傳送歷史選單 ▼'
 
 HistoryItem:
-  Material: "ENDER_EYE"
-  Display: "&7▶ &6傳送歷史紀錄"
+  Material: ENDER_EYE
+  Display: '&d傳送歷史紀錄'
   Lore:
-    - ""
-    - "  &8傳送時間： &7{time}"
-    - "  &8分流伺服： &7{server}"
-    - "  &8來源位置： &7{from}"
-    - "  &8目的位置： &7{to}"
-    - ""
-    - "  &7左邊為較&2新&7紀錄，右邊則為較&c舊&7紀錄。"
-    - ""
-    - "&9點擊傳送到該歷史位置。"
+    - ''
+    - '  &8傳送時間： &7{time}'
+    - ''
+    - '  &8來源伺服： &7{from_server}'
+    - '  &8來源位置： &7{from}'
+    - ''
+    - '  &8目的伺服： &7{to_server}'
+    - '  &8目的位置： &7{to}'
+    - ''
+    - '  &7左邊為較&2新&7紀錄，右邊則為較&c舊&7紀錄'
+    - ''
+    - '&9點擊傳送到該歷史位置。'
 
 ServerItem:
-  Command: "server"
-  Material: "NETHER_STAR"
-  Display: "&6分流伺服"
+  Command: server
+  Material: NETHER_STAR
+  Display: '&6分流伺服'
   Lore:
-    - ""
-    - "  &8目前位於： &7第一分流"
-    - ""
-    - "&9點擊來切換分流伺服器。"
+    - ''
+    - '  &8目前位於： &7第一分流'
+    - ''
+    - '&9點擊來切換分流伺服器。'
 
 SpawnItem:
-  Command: "spawn"
-  Material: "BEACON"
-  Display: "&6返回重生點"
+  Command: spawn
+  Material: BEACON
+  Display: '&6返回重生點'
   Lore:
-    - ""
-    - "  &8使用指令： &7/spawn"
-    - ""
-    - "&9點擊來回到伺服器重生點。"
+    - ''
+    - '  &8使用指令： &7/spawn'
+    - ''
+    - '&9點擊來回到伺服器重生點。'
 
 BackItem:
-  Command: "back"
-  Material: "ENDER_PEARL"
-  Display: "&6返回上一個位置"
+  Command: back
+  Material: ENDER_PEARL
+  Display: '&6返回上一個位置'
   Lore:
-    - ""
-    - "  &8使用指令： &7/back"
-    - ""
-    - "  &7可能因為傳送而原有位置被覆蓋。"
-    - ""
-    - "&9點擊來回到上一個傳送的點。"
+    - ''
+    - '  &8使用指令： &7/back'
+    - '  &8可能因為傳送而原有位置被覆蓋'
+    - ''
+    - '&9點擊來回到上一個傳送的點。'
 
 ClearItem:
-  Material: "FEATHER"
-  Display: "&6清除所有紀錄"
+  Material: FEATHER
+  Display: '&6清除所有紀錄'
   Lore:
-    - ""
-    - "  &8清除所有的傳送歷史"
-    - "  &8並不會清除 /back 的紀錄"
-    - "  &8幫忙減少伺服器負擔（笑話）"
-    - ""
-    - "&9點擊來刪除歷史紀錄。"
+    - ''
+    - '  &8清除所有的傳送歷史'
+    - '  &8並不會清除 /back 的紀錄'
+    - '  &8幫忙減少伺服器負擔（笑話）'
+    - ''
+    - '&9點擊來刪除歷史紀錄。'

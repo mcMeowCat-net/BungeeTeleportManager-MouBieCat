@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 public final class CacheData {
-    public static final int HISTORY_DATA_SIZE = 7;
+    private static final int HISTORY_DATA_SIZE = 7;
 
     private final UUID uuid;
     private final List<HistoryData> data = new LinkedList<>();

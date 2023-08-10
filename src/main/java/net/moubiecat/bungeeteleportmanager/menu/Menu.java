@@ -80,16 +80,17 @@ public abstract class Menu implements InventoryHolder, MenuHandler {
      *
      * @return 是否有下一頁
      */
-    protected abstract boolean hasNextPage(@NotNull Player player, int page);
+    protected boolean hasNextPage(@NotNull Player player, int page) {
+        return false;
+    }
 
     /**
      * 取得選單實例
      *
      * @return 選單實例
      */
-    @NotNull
     @Override
-    public final Inventory getInventory() {
+    public final @NotNull Inventory getInventory() {
         return this.inventory;
     }
 
@@ -99,7 +100,7 @@ public abstract class Menu implements InventoryHolder, MenuHandler {
      * @param event 事件
      */
     @Override
-    public void onOpen(@NotNull InventoryOpenEvent event) {
+    public void onInventoryOpen(@NotNull InventoryOpenEvent event) {
     }
 
     /**
@@ -108,7 +109,7 @@ public abstract class Menu implements InventoryHolder, MenuHandler {
      * @param event 事件
      */
     @Override
-    public void onClick(@NotNull InventoryClickEvent event) {
+    public void onInventoryClick(@NotNull InventoryClickEvent event) {
     }
 
     /**
@@ -117,6 +118,6 @@ public abstract class Menu implements InventoryHolder, MenuHandler {
      * @param event 事件
      */
     @Override
-    public void onClose(@NotNull InventoryCloseEvent event) {
+    public void onInventoryClose(@NotNull InventoryCloseEvent event) {
     }
 }

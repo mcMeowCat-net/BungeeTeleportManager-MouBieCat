@@ -6,6 +6,7 @@ import main.java.me.avankziar.spigot.btm.BungeeTeleportManager;
 import main.java.me.avankziar.spigot.btm.database.MysqlHandler;
 import net.moubiecat.bungeeteleportmanager.MouBieCat;
 import net.moubiecat.bungeeteleportmanager.services.ItemService;
+import net.moubiecat.bungeeteleportmanager.services.ServerLocationService;
 import net.moubiecat.bungeeteleportmanager.settings.HomeInventoryYaml;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -16,20 +17,15 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public final class HomeMenu extends Menu {
-    // 格式化工具
-    private static final DecimalFormat FORMAT = new DecimalFormat("#0.0");
-
     // 按鈕動作
-    private static final NamespacedKey ACTION_KEY = new NamespacedKey(JavaPlugin.getPlugin(MouBieCat.class), "action");
+    private static final NamespacedKey ACTION_KEY = new NamespacedKey(MouBieCat.getPlugin(), "menu_action");
 
     // 邊框格子
     private static final int[] BORDER_SLOT = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53};
@@ -60,6 +56,8 @@ public final class HomeMenu extends Menu {
     private final ItemStack deleteItem;
 
     private @Inject MouBieCat plugin;
+    private @Inject BungeeTeleportManager teleportManager;
+
     private @Inject HomeInventoryYaml yaml;
 
     private String currentHome = String.valueOf(0);
@@ -72,7 +70,6 @@ public final class HomeMenu extends Menu {
     @Inject
     public HomeMenu(@NotNull HomeInventoryYaml yaml) {
         super(MenuSize.SIX, yaml.getInventoryTitle());
-        this.yaml = yaml;
         teleportItem = ItemService.build(yaml.getTeleportHomeItemMaterial())
                 .name(yaml.getTeleportHomeItemDisplay())
                 .lore(yaml.getTeleportHomeItemLore())
@@ -104,19 +101,24 @@ public final class HomeMenu extends Menu {
         this.inventory.setItem(TELEPORT_SLOT, teleportItem);
         this.inventory.setItem(DELETE_SLOT, deleteItem);
         // 設置可用格子
-        final ArrayList<String> homeNames = BungeeTeleportManager.homes.get(view.getName());
+        final ArrayList<String> homeNames = teleportManager.homes.get(view.getName());
         try {
             for (int index = 0; index < AVAILABLE_SLOT.length; index++) {
+                // 獲取格子位置和家的名稱
                 final int slot = AVAILABLE_SLOT[index];
                 final String homeName = homeNames.get((page - 1) * AVAILABLE_SLOT.length + index);
+                final Home home = (Home) teleportManager.getMysqlHandler().getData(MysqlHandler.Type.HOME, "`player_uuid` = ? AND `home_name` = ?", new Object[]{view.getUniqueId().toString(), homeName});
                 // 獲取配置檔資料
                 final String display = this.yaml.getHomeItemDisplay();
                 final List<String> lore = this.yaml.getHomeItemLore();
-                final Home home = (Home) BungeeTeleportManager.getPlugin().getMysqlHandler().getData(MysqlHandler.Type.HOME, "`player_uuid` = ? AND `home_name` = ?", new Object[]{view.getUniqueId().toString(), homeName});
                 // 轉換佔位符資訊
-                lore.replaceAll(line -> line.replace("{name}", home.getHomeName())
-                        .replace("{server}", home.getLocation().getServer())
-                        .replace("{location}", FORMAT.format(home.getLocation().getX()) + ", " + FORMAT.format(home.getLocation().getY()) + ", " + FORMAT.format(home.getLocation().getZ())));
+                final ServerLocationService.Formatter formatter = ServerLocationService.formatter();
+                lore.replaceAll(line -> {
+                    line = line.replace("{name}", home.getHomeName());
+                    line = line.replace("{server}", home.getLocation().getServer());
+                    line = line.replace("{location}", formatter.format_world_x_y_z(home.getLocation()));
+                    return line;
+                });
                 // 設置物品
                 this.inventory.setItem(slot, ItemService.build(this.currentHome.equalsIgnoreCase(homeName) ? Material.RED_BED : Material.WHITE_BED)
                         .name(display)
@@ -138,12 +140,12 @@ public final class HomeMenu extends Menu {
      */
     @Override
     protected boolean hasNextPage(@NotNull Player player, int page) {
-        return page * AVAILABLE_SLOT.length < BungeeTeleportManager.homes.get(player.getName()).size();
+        return page * AVAILABLE_SLOT.length < this.teleportManager.homes.get(player.getName()).size();
     }
 
     @Override
     @SuppressWarnings("ConstantConditions")
-    public void onClick(@NotNull InventoryClickEvent event) {
+    public void onInventoryClick(@NotNull InventoryClickEvent event) {
         event.setCancelled(true);
         final Player player = (Player) event.getWhoClicked();
         final ItemStack currentItem = event.getCurrentItem();
@@ -155,10 +157,9 @@ public final class HomeMenu extends Menu {
         switch (action) {
             case "previous" -> this.previous(player);
             case "next" -> this.next(player);
-            case "teleport" ->
-                    BungeeTeleportManager.getPlugin().getHomeHelper().homeTo(player, new String[]{this.currentHome});
+            case "teleport" -> this.teleportManager.getHomeHelper().homeTo(player, new String[]{this.currentHome});
             case "delete" -> {
-                BungeeTeleportManager.getPlugin().getHomeHelper().homeRemove(player, new String[]{this.currentHome});
+                this.teleportManager.getHomeHelper().homeRemove(player, new String[]{this.currentHome});
                 // 延遲刷新選單
                 Bukkit.getScheduler().runTaskLater(plugin, () -> this.refresh(player), 5L);
                 return;

@@ -7,7 +7,7 @@ import net.moubiecat.bungeeteleportmanager.MouBieCat;
 import net.moubiecat.bungeeteleportmanager.data.HistoryData;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheManager;
 import net.moubiecat.bungeeteleportmanager.services.ItemService;
-import net.moubiecat.bungeeteleportmanager.services.LocationService;
+import net.moubiecat.bungeeteleportmanager.services.ServerLocationService;
 import net.moubiecat.bungeeteleportmanager.settings.HistoryInventoryYaml;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -17,21 +17,17 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 
 public final class HistoryMenu extends Menu {
-    // 格式化工具
-    private static final DecimalFormat FORMAT = new DecimalFormat("#0.0");
-    private static final SimpleDateFormat DATA_FORMAT = new SimpleDateFormat("yyyy 年 MM 月 dd 日 HH 時 mm 分 ss 秒");
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy 年 MM 月 dd 日 HH 時 mm 分 ss 秒");
 
     // 按鈕動作
-    private static final NamespacedKey ACTION_KEY = new NamespacedKey(JavaPlugin.getPlugin(MouBieCat.class), "menu_action");
+    private static final NamespacedKey ACTION_KEY = new NamespacedKey(MouBieCat.getPlugin(), "menu_action");
 
     // 邊框格子
     private static final int[] BORDER_SLOT = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 19, 20, 24, 25};
@@ -54,6 +50,8 @@ public final class HistoryMenu extends Menu {
     private final ItemStack clearItem;
 
     // 玩家資料相關管理器
+    private @Inject BungeeTeleportManager teleportManager;
+
     private @Inject CacheManager manager;
     private @Inject HistoryInventoryYaml yaml;
 
@@ -65,7 +63,6 @@ public final class HistoryMenu extends Menu {
     @Inject
     public HistoryMenu(@NotNull HistoryInventoryYaml yaml) {
         super(MenuSize.THREE, yaml.getInventoryTitle());
-        this.yaml = yaml;
         serverItem = ItemService.build(yaml.getServerItemMaterial())
                 .name(yaml.getServerItemDisplay())
                 .lore(yaml.getServerItemLore())
@@ -105,9 +102,10 @@ public final class HistoryMenu extends Menu {
         this.inventory.setItem(BACK_SLOT, this.backItem);
         this.inventory.setItem(CLEAR_SLOT, this.clearItem);
         // 設置玩家傳送歷史
+        final List<HistoryData> dataList = this.manager.getCacheData(view.getUniqueId()).getData();
         try {
-            final List<HistoryData> dataList = this.manager.getCacheData(view.getUniqueId()).getData();
             for (int index = 0; index < AVAILABLE_SLOT.length; index++) {
+                // 獲取格子位置和家的名稱
                 final int slot = AVAILABLE_SLOT[index];
                 final HistoryData data = dataList.get(index + (page - 1) * AVAILABLE_SLOT.length);
                 // 獲取配置檔資料
@@ -115,38 +113,31 @@ public final class HistoryMenu extends Menu {
                 final String display = this.yaml.getHistoryItemDisplay();
                 final List<String> lore = this.yaml.getHistoryItemLore();
                 // 轉換佔位符資訊
-                lore.replaceAll(line -> line.replace("{time}", DATA_FORMAT.format(data.getTime()))
-                        .replace("{server}", data.getServer())
-                        .replace("{from}", FORMAT.format(data.getFrom().getX()) + ", " + FORMAT.format(data.getFrom().getY()) + ", " + FORMAT.format(data.getFrom().getZ()))
-                        .replace("{to}", FORMAT.format(data.getTo().getX()) + ", " + FORMAT.format(data.getTo().getY()) + ", " + FORMAT.format(data.getTo().getZ())));
-                // 轉換為伺服器位置
-                final ServerLocation serverLocation = LocationService.covert(data.getServer(), data.getFrom());
+                final ServerLocationService.Formatter formatter = ServerLocationService.formatter();
+                final ServerLocation from = data.getFrom();
+                final ServerLocation to = data.getTo();
+                lore.replaceAll(line -> {
+                    line = line.replace("{time}", SIMPLE_DATE_FORMAT.format(data.getTime()));
+                    line = line.replace("{from_server}", from.getServer());
+                    line = line.replace("{from}", formatter.format_world_x_y_z(from));
+                    line = line.replace("{to_server}", to.getServer());
+                    line = line.replace("{to}", formatter.format_world_x_y_z(to));
+                    return line;
+                });
                 // 設置物品
                 this.inventory.setItem(slot, ItemService.build(material)
-                        .name(display)
+                        .name(display + " §7[" + index + "]")
                         .lore(lore)
-                        .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, LocationService.serialize(serverLocation))
+                        .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, ServerLocationService.serialize(from))
                         .build().orElseThrow());
             }
         } catch (final IndexOutOfBoundsException ignored) {
         }
     }
 
-    /**
-     * 是否有下一頁
-     *
-     * @param player
-     * @param page
-     * @return 是否有下一頁
-     */
-    @Override
-    protected boolean hasNextPage(@NotNull Player player, int page) {
-        return false;
-    }
-
     @Override
     @SuppressWarnings("ConstantConditions")
-    public void onClick(@NotNull InventoryClickEvent event) {
+    public void onInventoryClick(@NotNull InventoryClickEvent event) {
         event.setCancelled(true);
         final int slot = event.getSlot();
         final ItemStack currentItem = event.getCurrentItem();
@@ -160,8 +151,8 @@ public final class HistoryMenu extends Menu {
             case CLEAR_SLOT -> this.manager.getCacheData(event.getWhoClicked().getUniqueId()).clearData();
             default -> {
                 try {
-                    final ServerLocation serverLocation = LocationService.deserialize(action);
-                    BungeeTeleportManager.getPlugin().getTeleportHandler().sendTpPos((Player) event.getWhoClicked(), serverLocation);
+                    final ServerLocation serverLocation = ServerLocationService.deserialize(action);
+                    this.teleportManager.getTeleportHandler().sendTpPos((Player) event.getWhoClicked(), serverLocation);
                 } catch (final Exception ignored) {
                 }
             }

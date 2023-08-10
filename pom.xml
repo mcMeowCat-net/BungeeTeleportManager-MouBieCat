@@ -21,7 +21,7 @@
     <!-- 工作群組 -->
     <groupId>net.moubiecat</groupId>
     <artifactId>BungeeTeleportManager</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <!-- 專案配置 -->
     <properties>
@@ -98,6 +98,13 @@
                 <version>7</version>
                 <scope>provided</scope>
             </dependency>
+            <!-- Multiverse-Core -->
+            <dependency>
+                <groupId>com.onarandombox</groupId>
+                <artifactId>MultiverseCore</artifactId>
+                <version>4.3.9</version>
+                <scope>provided</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -132,6 +139,11 @@
         <dependency>
             <groupId>me.avankziar</groupId>
             <artifactId>BungeeTeleportManager</artifactId>
+        </dependency>
+        <!-- Multiverse-Core -->
+        <dependency>
+            <groupId>com.onarandombox</groupId>
+            <artifactId>MultiverseCore</artifactId>
         </dependency>
     </dependencies>
 

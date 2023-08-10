@@ -1,9 +1,12 @@
 package net.moubiecat.bungeeteleportmanager;
 
+import com.onarandombox.MultiverseCore.MultiverseCore;
+import main.java.me.avankziar.general.object.ServerLocation;
+import main.java.me.avankziar.spigot.btm.BungeeTeleportManager;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheManager;
 import net.moubiecat.bungeeteleportmanager.data.database.HistoryTable;
 import net.moubiecat.bungeeteleportmanager.data.database.HistoryTableImpl;
-import net.moubiecat.bungeeteleportmanager.data.database.handler.LocationTypeHandler;
+import net.moubiecat.bungeeteleportmanager.data.database.handler.ServerLocationTypeHandler;
 import net.moubiecat.bungeeteleportmanager.data.database.handler.UUIDTypeHandler;
 import net.moubiecat.bungeeteleportmanager.listener.CommandListener;
 import net.moubiecat.bungeeteleportmanager.listener.InventoryListener;
@@ -11,9 +14,9 @@ import net.moubiecat.bungeeteleportmanager.listener.PlayerListener;
 import net.moubiecat.bungeeteleportmanager.settings.ConfigYaml;
 import net.moubiecat.bungeeteleportmanager.settings.HistoryInventoryYaml;
 import net.moubiecat.bungeeteleportmanager.settings.HomeInventoryYaml;
+import net.moubiecat.bungeeteleportmanager.utils.BungeeTeleportManagerProvider;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -29,16 +32,21 @@ public final class MouBieCat extends JavaPlugin {
     public void onEnable() {
         // 資料庫依賴
         DATABASE_REGISTRATION.registerTypeHandler(UUID.class, UUIDTypeHandler.class);
-        DATABASE_REGISTRATION.registerTypeHandler(Location.class, LocationTypeHandler.class);
+        DATABASE_REGISTRATION.registerTypeHandler(ServerLocation.class, ServerLocationTypeHandler.class);
         DATABASE_REGISTRATION.registerMapper(HistoryTable.class);
         DATABASE_REGISTRATION.buildSqlSessionFactory();
-        // 其它注入依賴
-        INJECT_REGISTRATION.register(MouBieCat.class, this);
-        INJECT_REGISTRATION.register(ConfigYaml.class, new ConfigYaml(this));
-        INJECT_REGISTRATION.register(HistoryInventoryYaml.class, new HistoryInventoryYaml(this));
-        INJECT_REGISTRATION.register(HomeInventoryYaml.class, new HomeInventoryYaml(this));
-        INJECT_REGISTRATION.register(HistoryTable.class, new HistoryTableImpl());
-        INJECT_REGISTRATION.register(CacheManager.class, new CacheManager());
+        // 綁定插件實例
+        INJECT_REGISTRATION.bindPluginInstance(MouBieCat.class, this);
+        INJECT_REGISTRATION.bindPluginInstance(MultiverseCore.class, JavaPlugin.getPlugin(MultiverseCore.class));
+        INJECT_REGISTRATION.addProvider(BungeeTeleportManager.class, BungeeTeleportManagerProvider.class);
+        // 設定檔
+        INJECT_REGISTRATION.bindInstance(ConfigYaml.class, new ConfigYaml(this));
+        INJECT_REGISTRATION.bindInstance(HistoryInventoryYaml.class, new HistoryInventoryYaml(this));
+        INJECT_REGISTRATION.bindInstance(HomeInventoryYaml.class, new HomeInventoryYaml(this));
+        // 資料庫
+        INJECT_REGISTRATION.bindInstance(HistoryTable.class, new HistoryTableImpl());
+        // 快取資料庫
+        INJECT_REGISTRATION.bindInstance(CacheManager.class, new CacheManager());
         INJECT_REGISTRATION.bindInjector();
 
         // 創建 MySQL 資料表
@@ -51,13 +59,13 @@ public final class MouBieCat extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        InjectRegistration.INJECTOR.getInstance(ConfigYaml.class).save();
-        InjectRegistration.INJECTOR.getInstance(HistoryInventoryYaml.class).save();
+        getInstance(ConfigYaml.class).save();
+        getInstance(HistoryInventoryYaml.class).save();
     }
 
     public void onReload() {
-        InjectRegistration.INJECTOR.getInstance(ConfigYaml.class).load();
-        InjectRegistration.INJECTOR.getInstance(HistoryInventoryYaml.class).load();
+        getInstance(ConfigYaml.class).load();
+        getInstance(HistoryInventoryYaml.class).load();
     }
 
     /**
@@ -80,6 +88,16 @@ public final class MouBieCat extends JavaPlugin {
     @NotNull
     public static SqlSessionFactory getSqlSessionFactory() {
         return DatabaseRegistration.SQL_SESSION_FACTORY;
+    }
+
+    /**
+     * 取得插件實例
+     *
+     * @return
+     */
+    @NotNull
+    public static MouBieCat getPlugin() {
+        return JavaPlugin.getPlugin(MouBieCat.class);
     }
 
     /**

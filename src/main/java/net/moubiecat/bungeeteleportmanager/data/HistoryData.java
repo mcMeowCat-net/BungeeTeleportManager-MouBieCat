@@ -1,6 +1,6 @@
 package net.moubiecat.bungeeteleportmanager.data;
 
-import org.bukkit.Location;
+import main.java.me.avankziar.general.object.ServerLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,9 +9,8 @@ import java.util.UUID;
 public final class HistoryData {
     private final UUID uuid;
     private final long time;
-    private final String server;
-    private final Location fromLocation;
-    private final Location toLocation;
+    private final ServerLocation fromLocation;
+    private final ServerLocation toLocation;
 
     /**
      * 建構子
@@ -21,8 +20,8 @@ public final class HistoryData {
      * @param from   來源位置
      * @param to     目標位置
      */
-    public HistoryData(@NotNull UUID uuid, @NotNull String server, @NotNull Location from, @Nullable Location to) {
-        this(uuid, System.currentTimeMillis(), server, from, to);
+    public HistoryData(@NotNull UUID uuid, @NotNull ServerLocation from, @Nullable ServerLocation to) {
+        this(uuid, System.currentTimeMillis(), from, to);
     }
 
     /**
@@ -33,10 +32,9 @@ public final class HistoryData {
      * @param from   來源位置
      * @param to     目標位置
      */
-    public HistoryData(@NotNull UUID uuid, long time, @NotNull String server, @NotNull Location from, @Nullable Location to) {
+    public HistoryData(@NotNull UUID uuid, long time, @NotNull ServerLocation from, @Nullable ServerLocation to) {
         this.uuid = uuid;
         this.time = time;
-        this.server = server;
         this.fromLocation = from;
         this.toLocation = to;
     }
@@ -61,22 +59,12 @@ public final class HistoryData {
     }
 
     /**
-     * 取得伺服器名稱
-     *
-     * @return 伺服器名稱
-     */
-    @NotNull
-    public String getServer() {
-        return this.server;
-    }
-
-    /**
      * 取得來源位置
      *
      * @return 來源位置
      */
     @NotNull
-    public Location getFrom() {
+    public ServerLocation getFrom() {
         return this.fromLocation;
     }
 
@@ -85,8 +73,8 @@ public final class HistoryData {
      *
      * @return 目標位置
      */
-    @Nullable
-    public Location getTo() {
+    @NotNull
+    public ServerLocation getTo() {
         return this.toLocation;
     }
 }
