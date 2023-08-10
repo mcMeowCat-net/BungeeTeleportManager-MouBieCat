@@ -8,8 +8,10 @@ import net.moubiecat.bungeeteleportmanager.data.database.handler.UUIDTypeHandler
 import net.moubiecat.bungeeteleportmanager.listener.InventoryListener;
 import net.moubiecat.bungeeteleportmanager.listener.PlayerListener;
 import net.moubiecat.bungeeteleportmanager.menu.HistoryMenu;
+import net.moubiecat.bungeeteleportmanager.menu.HomeMenu;
 import net.moubiecat.bungeeteleportmanager.settings.ConfigYaml;
 import net.moubiecat.bungeeteleportmanager.settings.HistoryInventoryYaml;
+import net.moubiecat.bungeeteleportmanager.settings.HomeInventoryYaml;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -36,6 +38,7 @@ public final class MouBieCat extends JavaPlugin {
         INJECT_REGISTRATION.register(MouBieCat.class, this);
         INJECT_REGISTRATION.register(ConfigYaml.class, new ConfigYaml(this));
         INJECT_REGISTRATION.register(HistoryInventoryYaml.class, new HistoryInventoryYaml(this));
+        INJECT_REGISTRATION.register(HomeInventoryYaml.class, new HomeInventoryYaml(this));
         INJECT_REGISTRATION.register(HistoryTable.class, new HistoryTableImpl());
         INJECT_REGISTRATION.register(CacheManager.class, new CacheManager());
         INJECT_REGISTRATION.bindInjector();
@@ -94,6 +97,12 @@ public final class MouBieCat extends JavaPlugin {
         if (sender instanceof Player player && args.length == 1 && args[0].equalsIgnoreCase("history")) {
             // 如果輸入參數為 history，則顯示歷史紀錄
             MouBieCat.getInstance(HistoryMenu.class).open(player);
+            return true;
+        }
+
+        if (sender instanceof Player player && args.length == 1 && args[0].equalsIgnoreCase("homes")) {
+            // 如果輸入參數為 history，則顯示歷史紀錄
+            MouBieCat.getInstance(HomeMenu.class).open(player);
             return true;
         }
 

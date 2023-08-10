@@ -16,7 +16,7 @@ public final class HistoryInventoryYaml extends Yaml {
         super(plugin, "history-inventory.yml");
     }
 
-    public @NotNull String getTitle() {
+    public @NotNull String getInventoryTitle() {
         return this.configuration.getString("Title", "");
     }
 
@@ -78,5 +78,17 @@ public final class HistoryInventoryYaml extends Yaml {
 
     public @NotNull String getBackItemCommand() {
         return this.configuration.getString("BackItem.Command", "");
+    }
+
+    public @NotNull Material getClearItemMaterial() {
+        return Material.valueOf(this.configuration.getString("ClearItem.Material", "AIR"));
+    }
+
+    public @NotNull String getClearItemDisplay() {
+        return this.configuration.getString("ClearItem.Display", "");
+    }
+
+    public @NotNull List<String> getClearItemLore() {
+        return this.configuration.getStringList("ClearItem.Lore");
     }
 }

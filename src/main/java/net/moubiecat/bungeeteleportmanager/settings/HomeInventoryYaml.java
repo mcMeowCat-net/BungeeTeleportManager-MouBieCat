@@ -17,11 +17,11 @@ public final class HomeInventoryYaml extends Yaml {
     }
 
     public @NotNull String getInventoryTitle() {
-        return this.configuration.getString("Title", "Home List GUI");
+        return this.configuration.getString("Title", "");
     }
 
     public @NotNull String getHomeItemDisplay() {
-        return this.configuration.getString("HomeItem.Display", "Home");
+        return this.configuration.getString("HomeItem.Display", "");
     }
 
     public @NotNull List<String> getHomeItemLore() {
@@ -33,7 +33,7 @@ public final class HomeInventoryYaml extends Yaml {
     }
 
     public @NotNull String getTeleportHomeItemDisplay() {
-        return this.configuration.getString("TeleportItem.Display", "Home");
+        return this.configuration.getString("TeleportItem.Display", "");
     }
 
     public @NotNull List<String> getTeleportHomeItemLore() {
@@ -41,14 +41,14 @@ public final class HomeInventoryYaml extends Yaml {
     }
 
     public @NotNull Material getDeleteHomeItemMaterial() {
-        return Material.valueOf(this.configuration.getString("TeleportItem.Material", "AIR").toUpperCase());
+        return Material.valueOf(this.configuration.getString("DeleteItem.Material", "AIR").toUpperCase());
     }
 
     public @NotNull String getDeleteHomeItemDisplay() {
-        return this.configuration.getString("TeleportItem.Display", "Home");
+        return this.configuration.getString("DeleteItem.Display", "");
     }
 
     public @NotNull List<String> getDeleteHomeItemLore() {
-        return this.configuration.getStringList("TeleportItem.Lore");
+        return this.configuration.getStringList("DeleteItem.Lore");
     }
 }

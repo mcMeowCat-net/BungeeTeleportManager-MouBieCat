@@ -54,4 +54,11 @@ public final class CacheData {
     public List<HistoryData> getData() {
         return this.data;
     }
+
+    /**
+     * 清除玩家傳送資料
+     */
+    public void clearData() {
+        this.data.clear();
+    }
 }

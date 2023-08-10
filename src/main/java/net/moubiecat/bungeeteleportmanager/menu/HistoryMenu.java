@@ -34,7 +34,7 @@ public final class HistoryMenu extends Menu {
     private static final NamespacedKey ACTION_KEY = new NamespacedKey(JavaPlugin.getPlugin(MouBieCat.class), "menu_action");
 
     // 邊框格子
-    private static final int[] BORDER_SLOT = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 19, 20, 24, 25, 26};
+    private static final int[] BORDER_SLOT = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 19, 20, 24, 25};
     private static final ItemStack BORDER_ITEM = ItemService.build(Material.BLACK_STAINED_GLASS_PANE)
             .name(" ")
             .build()
@@ -50,6 +50,8 @@ public final class HistoryMenu extends Menu {
     private final ItemStack spawnItem;
     private static final int BACK_SLOT = 23;
     private final ItemStack backItem;
+    private static final int CLEAR_SLOT = 26;
+    private final ItemStack clearItem;
 
     // 玩家資料相關管理器
     private @Inject CacheManager manager;
@@ -58,12 +60,11 @@ public final class HistoryMenu extends Menu {
     /**
      * 建構子
      *
-     * @param size  選單大小
-     * @param title 選單標題
+     * @param yaml 配置檔
      */
     @Inject
     public HistoryMenu(@NotNull HistoryInventoryYaml yaml) {
-        super(MenuSize.THREE, yaml.getTitle());
+        super(MenuSize.THREE, yaml.getInventoryTitle());
         this.yaml = yaml;
         serverItem = ItemService.build(yaml.getServerItemMaterial())
                 .name(yaml.getServerItemDisplay())
@@ -79,6 +80,10 @@ public final class HistoryMenu extends Menu {
                 .name(yaml.getBackItemDisplay())
                 .lore(yaml.getBackItemLore())
                 .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, yaml.getBackItemCommand())
+                .build().orElseThrow();
+        clearItem = ItemService.build(yaml.getClearItemMaterial())
+                .name(yaml.getClearItemDisplay())
+                .lore(yaml.getClearItemLore())
                 .build().orElseThrow();
     }
 
@@ -97,6 +102,7 @@ public final class HistoryMenu extends Menu {
         this.inventory.setItem(SERVER_SLOT, this.serverItem);
         this.inventory.setItem(SPAWN_SLOT, this.spawnItem);
         this.inventory.setItem(BACK_SLOT, this.backItem);
+        this.inventory.setItem(CLEAR_SLOT, this.clearItem);
         // 設置玩家傳送歷史
         try {
             final List<HistoryData> dataList = this.manager.getCacheData(view.getUniqueId()).getData();
@@ -150,6 +156,7 @@ public final class HistoryMenu extends Menu {
 
         switch (slot) {
             case SERVER_SLOT, SPAWN_SLOT, BACK_SLOT -> Bukkit.dispatchCommand(event.getWhoClicked(), action);
+            case CLEAR_SLOT -> this.manager.getCacheData(event.getWhoClicked().getUniqueId()).clearData();
             default -> {
                 try {
                     final ServerLocation serverLocation = LocationService.deserialize(action);
@@ -158,5 +165,8 @@ public final class HistoryMenu extends Menu {
                 }
             }
         }
+
+        // 刷新選單
+        this.refresh((Player) event.getWhoClicked());
     }
 }

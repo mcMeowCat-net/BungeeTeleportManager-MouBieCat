@@ -12,18 +12,18 @@ HomeItem:
 
 TeleportItem:
   Material: "ENDER_PEARL"
-  Display: "&6家點紀錄"
+  Display: "&6傳送到該紀錄點"
   Lore:
     - ""
-    - "  &8目前所選： &7{name}"
+    - "  &8紅色床為選擇項，未選擇項為白色床。"
     - ""
     - "&9點擊來傳送到這個紀錄點。"
 
 DeleteItem:
   Material: "TNT"
-  Display: "&6家點紀錄"
+  Display: "&6刪除該紀錄點"
   Lore:
     - ""
-    - "  &8目前所選： &7{name}"
+    - "  &8紅色床為選擇項，未選擇項為白色床。"
     - ""
     - "&9點擊來刪除這個紀錄點。"
