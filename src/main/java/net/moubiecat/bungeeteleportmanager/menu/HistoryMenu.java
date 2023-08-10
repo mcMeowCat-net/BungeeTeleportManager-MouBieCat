@@ -84,6 +84,7 @@ public final class HistoryMenu extends Menu {
         clearItem = ItemService.build(yaml.getClearItemMaterial())
                 .name(yaml.getClearItemDisplay())
                 .lore(yaml.getClearItemLore())
+                .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, String.valueOf(0))
                 .build().orElseThrow();
     }
 

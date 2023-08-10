@@ -5,10 +5,9 @@ import net.moubiecat.bungeeteleportmanager.data.database.HistoryTable;
 import net.moubiecat.bungeeteleportmanager.data.database.HistoryTableImpl;
 import net.moubiecat.bungeeteleportmanager.data.database.handler.LocationTypeHandler;
 import net.moubiecat.bungeeteleportmanager.data.database.handler.UUIDTypeHandler;
+import net.moubiecat.bungeeteleportmanager.listener.CommandListener;
 import net.moubiecat.bungeeteleportmanager.listener.InventoryListener;
 import net.moubiecat.bungeeteleportmanager.listener.PlayerListener;
-import net.moubiecat.bungeeteleportmanager.menu.HistoryMenu;
-import net.moubiecat.bungeeteleportmanager.menu.HomeMenu;
 import net.moubiecat.bungeeteleportmanager.settings.ConfigYaml;
 import net.moubiecat.bungeeteleportmanager.settings.HistoryInventoryYaml;
 import net.moubiecat.bungeeteleportmanager.settings.HomeInventoryYaml;
@@ -17,7 +16,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -48,6 +46,7 @@ public final class MouBieCat extends JavaPlugin {
         // 註冊事件
         Bukkit.getPluginManager().registerEvents(MouBieCat.getInstance(PlayerListener.class), this);
         Bukkit.getPluginManager().registerEvents(MouBieCat.getInstance(InventoryListener.class), this);
+        Bukkit.getPluginManager().registerEvents(MouBieCat.getInstance(CommandListener.class), this);
     }
 
     @Override
@@ -94,18 +93,6 @@ public final class MouBieCat extends JavaPlugin {
      */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (sender instanceof Player player && args.length == 1 && args[0].equalsIgnoreCase("history")) {
-            // 如果輸入參數為 history，則顯示歷史紀錄
-            MouBieCat.getInstance(HistoryMenu.class).open(player);
-            return true;
-        }
-
-        if (sender instanceof Player player && args.length == 1 && args[0].equalsIgnoreCase("homes")) {
-            // 如果輸入參數為 history，則顯示歷史紀錄
-            MouBieCat.getInstance(HomeMenu.class).open(player);
-            return true;
-        }
-
         if (args.length == 1 && args[0].equalsIgnoreCase("reload") && sender.hasPermission("MBBungeeTeleportManager.reload")) {
             // 如果輸入參數為 reload，則重載插件
             this.onReload();

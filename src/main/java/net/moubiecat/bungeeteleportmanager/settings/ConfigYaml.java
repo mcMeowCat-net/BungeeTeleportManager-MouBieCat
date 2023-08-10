@@ -22,4 +22,8 @@ public final class ConfigYaml extends Yaml {
     public @NotNull List<String> getCommandHomes() {
         return this.configuration.getStringList("CommandHomes");
     }
+
+    public @NotNull List<String> getCommandBack() {
+        return this.configuration.getStringList("CommandBack");
+    }
 }

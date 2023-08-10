@@ -5,4 +5,9 @@ LogCauses:
 
 # Homes Command Override
 CommandHomes:
-  - "homes"
+  - "/homes"
+  - "/home"
+
+# Back Command Override
+CommandBack:
+  - "/back"
