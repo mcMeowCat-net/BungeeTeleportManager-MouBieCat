@@ -37,6 +37,16 @@ SpawnItem:
     - ''
     - '&9點擊來回到伺服器重生點。'
 
+RandomTeleport:
+  Command: rtp
+  Material: FIREWORK_ROCKET
+  Display: '&6隨機傳送'
+  Lore:
+    - ''
+    - '  &8使用指令： &7/rtp'
+    - ''
+    - '&9點擊來傳送到荒野。'
+
 BackItem:
   Command: back
   Material: ENDER_PEARL

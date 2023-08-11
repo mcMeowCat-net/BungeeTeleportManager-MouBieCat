@@ -64,6 +64,22 @@ public final class HistoryInventoryYaml extends Yaml {
         return this.configuration.getString("SpawnItem.Command", "");
     }
 
+    public @NotNull Material getRandomTeleportItemMaterial() {
+        return Material.valueOf(this.configuration.getString("RandomTeleport.Material", "AIR"));
+    }
+
+    public @NotNull String getRandomTeleportItemDisplay() {
+        return this.configuration.getString("RandomTeleport.Display", "");
+    }
+
+    public @NotNull List<String> getRandomTeleportItemLore() {
+        return this.configuration.getStringList("RandomTeleport.Lore");
+    }
+
+    public @NotNull String getRandomTeleportItemCommand() {
+        return this.configuration.getString("RandomTeleport.Command", "");
+    }
+
     public @NotNull Material getBackItemMaterial() {
         return Material.valueOf(this.configuration.getString("BackItem.Material", "AIR"));
     }

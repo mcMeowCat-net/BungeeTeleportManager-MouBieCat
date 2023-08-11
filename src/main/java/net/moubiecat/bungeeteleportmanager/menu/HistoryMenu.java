@@ -30,7 +30,7 @@ public final class HistoryMenu extends Menu {
     private static final NamespacedKey ACTION_KEY = new NamespacedKey(MouBieCat.getPlugin(), "menu_action");
 
     // 邊框格子
-    private static final int[] BORDER_SLOT = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 19, 20, 24, 25};
+    private static final int[] BORDER_SLOT = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 19, 20, 24, 25, 26};
     private static final ItemStack BORDER_ITEM = ItemService.build(Material.BLACK_STAINED_GLASS_PANE)
             .name(" ")
             .build()
@@ -40,13 +40,15 @@ public final class HistoryMenu extends Menu {
     private static final int[] AVAILABLE_SLOT = {10, 11, 12, 13, 14, 15, 16};
 
     // 其它按鈕格子
-    private static final int SERVER_SLOT = 21;
+    private static final int SERVER_SLOT = 20;
     private final ItemStack serverItem;
-    private static final int SPAWN_SLOT = 22;
+    private static final int SPAWN_SLOT = 21;
     private final ItemStack spawnItem;
+    private static final int RANDOM_TELEPORT_SLOT = 22;
+    private final ItemStack randomTeleportItem;
     private static final int BACK_SLOT = 23;
     private final ItemStack backItem;
-    private static final int CLEAR_SLOT = 26;
+    private static final int CLEAR_SLOT = 24;
     private final ItemStack clearItem;
 
     // 玩家資料相關管理器
@@ -71,6 +73,11 @@ public final class HistoryMenu extends Menu {
                 .name(yaml.getSpawnItemDisplay())
                 .lore(yaml.getSpawnItemLore())
                 .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, yaml.getSpawnItemCommand())
+                .build().orElseThrow();
+        randomTeleportItem = ItemService.build(yaml.getRandomTeleportItemMaterial())
+                .name(yaml.getRandomTeleportItemDisplay())
+                .lore(yaml.getRandomTeleportItemLore())
+                .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, yaml.getRandomTeleportItemCommand())
                 .build().orElseThrow();
         backItem = ItemService.build(yaml.getBackItemMaterial())
                 .name(yaml.getBackItemDisplay())
@@ -98,6 +105,7 @@ public final class HistoryMenu extends Menu {
         // 設置其它按鈕
         this.inventory.setItem(SERVER_SLOT, this.serverItem);
         this.inventory.setItem(SPAWN_SLOT, this.spawnItem);
+        this.inventory.setItem(RANDOM_TELEPORT_SLOT, this.randomTeleportItem);
         this.inventory.setItem(BACK_SLOT, this.backItem);
         this.inventory.setItem(CLEAR_SLOT, this.clearItem);
         // 設置玩家傳送歷史
@@ -146,7 +154,8 @@ public final class HistoryMenu extends Menu {
             return;
 
         switch (slot) {
-            case SERVER_SLOT, SPAWN_SLOT, BACK_SLOT -> Bukkit.dispatchCommand(event.getWhoClicked(), action);
+            case SERVER_SLOT, SPAWN_SLOT, RANDOM_TELEPORT_SLOT, BACK_SLOT ->
+                    Bukkit.dispatchCommand(event.getWhoClicked(), action);
             case CLEAR_SLOT -> this.manager.getCacheData(event.getWhoClicked().getUniqueId()).clearData();
             default -> {
                 try {
