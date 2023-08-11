@@ -5,6 +5,7 @@ import main.java.me.avankziar.general.object.ServerLocation;
 import main.java.me.avankziar.spigot.btm.BungeeTeleportManager;
 import net.moubiecat.bungeeteleportmanager.MouBieCat;
 import net.moubiecat.bungeeteleportmanager.data.HistoryData;
+import net.moubiecat.bungeeteleportmanager.data.cache.CacheData;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheManager;
 import net.moubiecat.bungeeteleportmanager.services.ItemService;
 import net.moubiecat.bungeeteleportmanager.services.ServerLocationService;
@@ -19,15 +20,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 
 public final class HistoryMenu extends Menu {
-    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy 年 MM 月 dd 日 HH 時 mm 分 ss 秒");
-
     // 按鈕動作
-    private static final NamespacedKey ACTION_KEY = new NamespacedKey(MouBieCat.getPlugin(), "menu_action");
+    public static final NamespacedKey ACTION_KEY = new NamespacedKey(MouBieCat.getPlugin(), "menu_action");
 
     // 邊框格子
     private static final int[] BORDER_SLOT = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 19, 20, 24, 25, 26};
@@ -109,36 +107,21 @@ public final class HistoryMenu extends Menu {
         this.inventory.setItem(BACK_SLOT, this.backItem);
         this.inventory.setItem(CLEAR_SLOT, this.clearItem);
         // 設置玩家傳送歷史
-        final List<HistoryData> dataList = this.manager.getCacheData(view.getUniqueId()).getData();
-        try {
+        final CacheData cacheData = this.manager.getCacheData(view.getUniqueId());
+        if (cacheData != null) {
+            final List<HistoryData> dataList = cacheData.getData();
             for (int index = 0; index < AVAILABLE_SLOT.length; index++) {
-                // 獲取格子位置和家的名稱
-                final int slot = AVAILABLE_SLOT[index];
+                // 超出資料範圍
+                if (index + (page - 1) * AVAILABLE_SLOT.length >= dataList.size()) break;
                 final HistoryData data = dataList.get(index + (page - 1) * AVAILABLE_SLOT.length);
-                // 獲取配置檔資料
-                final Material material = this.yaml.getHistoryItemMaterial();
-                final String display = this.yaml.getHistoryItemDisplay();
-                final List<String> lore = this.yaml.getHistoryItemLore();
-                // 轉換佔位符資訊
-                final ServerLocationService.Formatter formatter = ServerLocationService.formatter();
-                final ServerLocation from = data.getFrom();
-                final ServerLocation to = data.getTo();
-                lore.replaceAll(line -> {
-                    line = line.replace("{time}", SIMPLE_DATE_FORMAT.format(data.getTime()));
-                    line = line.replace("{from_server}", from.getServer());
-                    line = line.replace("{from}", formatter.format_world_x_y_z(from));
-                    line = line.replace("{to_server}", to.getServer());
-                    line = line.replace("{to}", formatter.format_world_x_y_z(to));
-                    return line;
-                });
-                // 設置物品
-                this.inventory.setItem(slot, ItemService.build(material)
-                        .name(display + " §7[" + index + "]")
-                        .lore(lore)
-                        .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, ServerLocationService.serialize(from))
-                        .build().orElseThrow());
+                // 建立按鈕
+                final HistoryButton button = new HistoryButton(data,
+                        this.yaml.getHistoryItemMaterial(),
+                        this.yaml.getHistoryItemDisplay(),
+                        this.yaml.getHistoryItemLore());
+                // 設置按鈕
+                this.inventory.setItem(AVAILABLE_SLOT[index], button.build());
             }
-        } catch (final IndexOutOfBoundsException ignored) {
         }
     }
 

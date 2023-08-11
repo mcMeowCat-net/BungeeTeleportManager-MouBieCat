@@ -21,7 +21,7 @@
     <!-- 工作群組 -->
     <groupId>net.moubiecat</groupId>
     <artifactId>BungeeTeleportManager</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 
     <!-- 專案配置 -->
     <properties>

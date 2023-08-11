@@ -39,8 +39,9 @@ public final class ServerLocationService {
      *
      * @param server   伺服器名稱
      * @param location 位置
-     * @return
+     * @return 伺服器位置
      */
+    @SuppressWarnings("ConstantConditions")
     public static @NotNull ServerLocation covert(@NotNull String server, @NotNull Location location) {
         return new ServerLocation(server, location.getWorld().getName(), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
     }
@@ -54,7 +55,7 @@ public final class ServerLocationService {
 
     public static final class Formatter {
         private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#0.0");
-        private static final String FORMAT_PATTERN_SERVER = "§e%s §8- §7%s§8, §7%s§8, §7%s§r";
+        private static final String FORMAT_PATTERN_SERVER = "§b%s §e%s §8- §7%s§8, §7%s§8, §7%s§r";
         private static final String FORMAT_PATTERN_LOCATION = "§e%s §8- §7%s§8, §7%s§8, §7%s§r";
 
         private @Inject MultiverseCore multiverseCore;
@@ -63,7 +64,7 @@ public final class ServerLocationService {
          * 格式化
          *
          * @param location 伺服器位置
-         * @return
+         * @return 格式化後的字串
          */
         public @NotNull String format_server_world_x_y_z(@NotNull ServerLocation location) {
             // 取得世界別名
@@ -82,7 +83,7 @@ public final class ServerLocationService {
          * 格式化
          *
          * @param location 伺服器位置
-         * @return
+         * @return 格式化後的字串
          */
         public @NotNull String format_world_x_y_z(@NotNull ServerLocation location) {
             // 取得世界別名

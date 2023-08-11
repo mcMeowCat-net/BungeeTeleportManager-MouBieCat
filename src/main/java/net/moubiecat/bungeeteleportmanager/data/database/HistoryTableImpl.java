@@ -42,13 +42,4 @@ public final class HistoryTableImpl implements HistoryTable {
             sqlSession.commit();
         }
     }
-
-    @Override
-    public void deleteDataForTime(UUID player, long time) {
-        try (final SqlSession sqlSession = MouBieCat.getSqlSessionFactory().openSession()) {
-            final HistoryTable dataMapper = sqlSession.getMapper(HistoryTable.class);
-            dataMapper.deleteDataForTime(player, time);
-            sqlSession.commit();
-        }
-    }
 }

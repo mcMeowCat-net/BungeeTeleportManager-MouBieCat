@@ -78,6 +78,8 @@ public abstract class Menu implements InventoryHolder, MenuHandler {
     /**
      * 是否有下一頁
      *
+     * @param player 開啟選單的玩家
+     * @param page   頁數
      * @return 是否有下一頁
      */
     protected boolean hasNextPage(@NotNull Player player, int page) {

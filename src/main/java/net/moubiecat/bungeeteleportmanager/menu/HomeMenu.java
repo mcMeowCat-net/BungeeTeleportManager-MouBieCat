@@ -6,12 +6,10 @@ import main.java.me.avankziar.spigot.btm.BungeeTeleportManager;
 import main.java.me.avankziar.spigot.btm.database.MysqlHandler;
 import net.moubiecat.bungeeteleportmanager.MouBieCat;
 import net.moubiecat.bungeeteleportmanager.services.ItemService;
-import net.moubiecat.bungeeteleportmanager.services.ServerLocationService;
 import net.moubiecat.bungeeteleportmanager.settings.HomeInventoryYaml;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -21,11 +19,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public final class HomeMenu extends Menu {
     // 按鈕動作
-    private static final NamespacedKey ACTION_KEY = new NamespacedKey(MouBieCat.getPlugin(), "menu_action");
+    public static final NamespacedKey ACTION_KEY = new NamespacedKey(MouBieCat.getPlugin(), "menu_action");
 
     // 邊框格子
     private static final int[] BORDER_SLOT = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53};
@@ -100,46 +97,33 @@ public final class HomeMenu extends Menu {
         this.inventory.setItem(TELEPORT_SLOT, teleportItem);
         this.inventory.setItem(DELETE_SLOT, deleteItem);
         // 設置可用格子
-        final ArrayList<String> homeNames = teleportManager.homes.get(view.getName());
-        try {
-            for (int index = 0; index < AVAILABLE_SLOT.length; index++) {
-                // 獲取格子位置和家的名稱
-                final int slot = AVAILABLE_SLOT[index];
-                final String homeName = homeNames.get((page - 1) * AVAILABLE_SLOT.length + index);
-                final Home home = (Home) teleportManager.getMysqlHandler().getData(MysqlHandler.Type.HOME, "`player_uuid` = ? AND `home_name` = ?", new Object[]{view.getUniqueId().toString(), homeName});
-                // 獲取配置檔資料
-                final String display = this.yaml.getHomeItemDisplay();
-                final List<String> lore = this.yaml.getHomeItemLore();
-                // 轉換佔位符資訊
-                final ServerLocationService.Formatter formatter = ServerLocationService.formatter();
-                lore.replaceAll(line -> {
-                    line = line.replace("{name}", home.getHomeName());
-                    line = line.replace("{server}", home.getLocation().getServer());
-                    line = line.replace("{location}", formatter.format_world_x_y_z(home.getLocation()));
-                    return line;
-                });
-                // 設置物品
-                this.inventory.setItem(slot, ItemService.build(this.currentHome.equalsIgnoreCase(homeName) ? Material.RED_BED : Material.WHITE_BED)
-                        .name(display)
-                        .lore(lore)
-                        .addPersistentDataContainer(ACTION_KEY, PersistentDataType.STRING, home.getHomeName())
-                        .build()
-                        .orElseThrow());
-            }
-        } catch (final IndexOutOfBoundsException ignored) {
+        final ArrayList<String> homeNames = BungeeTeleportManager.homes.get(view.getName());
+        for (int index = 0; index < AVAILABLE_SLOT.length; index++) {
+            // 超出家數量
+            if (homeNames.size() <= (page - 1) * AVAILABLE_SLOT.length + index) break;
+            // 設置家按鈕
+            final String homeName = homeNames.get((page - 1) * AVAILABLE_SLOT.length + index);
+            final Home home = (Home) teleportManager.getMysqlHandler().getData(
+                    MysqlHandler.Type.HOME, "`player_uuid` = ? AND `home_name` = ?",
+                    new Object[]{view.getUniqueId().toString(), homeName});
+            // 設置家按鈕
+            final int slot = AVAILABLE_SLOT[index];
+            this.inventory.setItem(slot,
+                    new HomeButton(homeName.equals(this.currentHome), home, this.yaml.getHomeItemDisplay(), this.yaml.getHomeItemLore())
+                            .build());
         }
     }
 
     /**
      * 是否有下一頁
      *
-     * @param player
-     * @param page
+     * @param player 玩家
+     * @param page   頁數
      * @return 是否有下一頁
      */
     @Override
     protected boolean hasNextPage(@NotNull Player player, int page) {
-        return page * AVAILABLE_SLOT.length < this.teleportManager.homes.get(player.getName()).size();
+        return page * AVAILABLE_SLOT.length < BungeeTeleportManager.homes.get(player.getName()).size();
     }
 
     @Override
@@ -163,10 +147,7 @@ public final class HomeMenu extends Menu {
                 Bukkit.getScheduler().runTaskLater(plugin, () -> this.refresh(player), 5L);
                 return;
             }
-            default -> {
-                this.currentHome = action;
-                player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
-            }
+            default -> this.currentHome = action;
         }
 
         // 刷新選單

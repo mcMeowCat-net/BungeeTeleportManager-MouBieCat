@@ -1,6 +1,7 @@
 package net.moubiecat.bungeeteleportmanager.data.cache;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,11 +35,7 @@ public final class CacheManager {
      * @param uuid 玩家UUID
      * @return 快取資料
      */
-    @NotNull
-    public CacheData getCacheData(@NotNull UUID uuid) {
-        if (!this.cacheData.containsKey(uuid))
-            this.cacheData.put(uuid, new CacheData(uuid));
-
+    public @Nullable CacheData getCacheData(@NotNull UUID uuid) {
         return this.cacheData.get(uuid);
     }
 }

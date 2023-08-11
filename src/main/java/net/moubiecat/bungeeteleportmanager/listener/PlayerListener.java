@@ -11,7 +11,6 @@ import net.moubiecat.bungeeteleportmanager.data.database.HistoryTable;
 import net.moubiecat.bungeeteleportmanager.services.ServerLocationService;
 import net.moubiecat.bungeeteleportmanager.settings.ConfigYaml;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -20,13 +19,12 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.UUID;
 
 public final class PlayerListener implements Listener {
     private @Inject MouBieCat plugin;
     private @Inject BungeeTeleportManager teleportManager;
-
     private @Inject ConfigYaml config;
-
     private @Inject HistoryTable database;
     private @Inject CacheManager cacheManager;
 
@@ -37,22 +35,21 @@ public final class PlayerListener implements Listener {
      */
     @EventHandler
     public void onTeleportEvent(@NotNull PlayerTeleportEvent event) {
-        // 過濾傳送原因、位置
-        if (this.config.getCauses().contains(event.getCause().name())) {
-            // 取得玩家資料
-            final Player player = event.getPlayer();
-            final CacheData cacheData = this.cacheManager.getCacheData(player.getUniqueId());
+        final UUID player = event.getPlayer().getUniqueId();
 
-            // 轉換為伺服器位置
-            // 事實上 Servername 是多餘的，因為 BungeeCord 跨分流時並不會觸發該該事件。
-            // 且 BungeeTeleportManager 也沒有事件可以監聽 BungeeCord 傳送事件。
-            // 我只是為了將來而考量，目前暫且不是太重要的事情。
-            final String servername = teleportManager.getServername();
-            final ServerLocation fromLocation = ServerLocationService.covert(servername, event.getFrom());
-            final ServerLocation toLocation = ServerLocationService.covert(servername, event.getTo());
-
+        // BungeeTeleportManager 會在傳送到其他伺服器時調用 teleport 方法
+        // 但是 PlayerJoinEvent 我們必須延遲執行，避免資料庫連線問題
+        // 所以這裡選擇忽略，等待 PlayerJoinEvent 執行。不過該事件也沒有儲存來源伺服器名稱，所以忽略也沒關係。
+        // 過濾傳送原因、位置，並且玩家有快取資料
+        final CacheData cacheData = this.cacheManager.getCacheData(player);
+        if (cacheData != null && this.config.getCauses().contains(event.getCause().name()) && event.getTo() != null) {
+            // 獲取伺服器名稱
+            final String server = teleportManager.getServername();
+            // 轉換位置
+            final ServerLocation fromLocation = ServerLocationService.covert(server, event.getFrom());
+            final ServerLocation toLocation = ServerLocationService.covert(server, event.getTo());
             // 添加資料
-            cacheData.addData(new HistoryData(player.getUniqueId(), fromLocation, toLocation));
+            cacheData.addData(new HistoryData(player, fromLocation, toLocation));
         }
     }
 
@@ -63,16 +60,20 @@ public final class PlayerListener implements Listener {
      */
     @EventHandler
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
-        final Player player = event.getPlayer();
+        final UUID player = event.getPlayer().getUniqueId();
 
-        // 延遲執行，避免資料庫連線問題
         Bukkit.getScheduler().runTaskLaterAsynchronously(this.plugin, () -> {
-            final List<HistoryData> dataList = this.database.selectData(player.getUniqueId());
-            final CacheData cacheData = new CacheData(player.getUniqueId());
+            // 查詢資料庫
+            final List<HistoryData> dataList = this.database.selectData(player);
+
+            // 建立快取
+            final CacheData cacheData = new CacheData(player);
             dataList.stream()
                     .sorted((data1, data2) -> (int) (data2.getTime() - data1.getTime()))
                     .forEach(cacheData::addData);
-            this.cacheManager.addCacheData(player.getUniqueId(), cacheData);
+
+            // 保存快取
+            this.cacheManager.addCacheData(player, cacheData);
         }, 5L);
     }
 
@@ -83,14 +84,20 @@ public final class PlayerListener implements Listener {
      */
     @EventHandler
     public void onPlayerQuit(@NotNull PlayerQuitEvent event) {
-        final Player player = event.getPlayer();
-        // 獲取快取
-        final CacheData cacheData = this.cacheManager.getCacheData(player.getUniqueId());
-        // 保存到資料庫，首先刪除資料庫中的資料
-        this.database.deleteData(player.getUniqueId());
-        // 將快取中的資料保存到資料庫
-        cacheData.getData().forEach(this.database::insertData);
-        // 移除快取
-        this.cacheManager.removeCacheData(player.getUniqueId());
+        final UUID player = event.getPlayer().getUniqueId();
+
+        Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
+            // 獲取快取
+            final CacheData cacheData = this.cacheManager.getCacheData(player);
+            if (cacheData == null)
+                return;
+
+            // 保存到資料庫，首先刪除資料庫中的資料
+            this.database.deleteData(player);
+            cacheData.getData().forEach(this.database::insertData);
+
+            // 移除快取
+            this.cacheManager.removeCacheData(player);
+        });
     }
 }

@@ -16,7 +16,6 @@ public final class HistoryData {
      * 建構子
      *
      * @param uuid   玩家UUID
-     * @param server 伺服器名稱
      * @param from   來源位置
      * @param to     目標位置
      */
@@ -28,7 +27,6 @@ public final class HistoryData {
      * 建構子
      *
      * @param uuid   玩家UUID
-     * @param server 伺服器名稱
      * @param from   來源位置
      * @param to     目標位置
      */

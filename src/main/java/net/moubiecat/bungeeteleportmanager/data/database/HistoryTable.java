@@ -27,7 +27,4 @@ public interface HistoryTable {
 
     @Delete("DELETE FROM " + TABLE_NAME + " WHERE UUID = #{uuid}")
     void deleteData(@Param("uuid") UUID player);
-
-    @Delete("DELETE FROM " + TABLE_NAME + " WHERE UUID = #{uuid} AND TIME = #{time}")
-    void deleteDataForTime(@Param("uuid") UUID player, @Param("time") long time);
 }
