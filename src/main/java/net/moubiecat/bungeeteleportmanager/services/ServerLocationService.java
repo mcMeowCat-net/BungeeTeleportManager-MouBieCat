@@ -61,6 +61,13 @@ public final class ServerLocationService {
         private @Inject MultiverseCore multiverseCore;
 
         /**
+         * 建構子
+         * 使外部無法建構，請調用 {@link #formatter()}
+         */
+        Formatter() {
+        }
+
+        /**
          * 格式化
          *
          * @param location 伺服器位置
