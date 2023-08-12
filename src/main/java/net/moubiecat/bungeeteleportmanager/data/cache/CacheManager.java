@@ -8,7 +8,16 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class CacheManager {
+    private static final CacheManager INSTANCE = new CacheManager();
+
     private final Map<UUID, CacheData> cacheData = new HashMap<>();
+
+    /**
+     * 建構子
+     * 這裡是單例模式
+     */
+    CacheManager() {
+    }
 
     /**
      * 取得快取資料
@@ -37,5 +46,14 @@ public final class CacheManager {
      */
     public @Nullable CacheData getCacheData(@NotNull UUID uuid) {
         return this.cacheData.get(uuid);
+    }
+
+    /**
+     * 取得快取管理器
+     *
+     * @return 快取管理器
+     */
+    public static @NotNull CacheManager getInstance() {
+        return INSTANCE;
     }
 }

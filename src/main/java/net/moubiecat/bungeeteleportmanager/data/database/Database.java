@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.*;
 import java.util.List;
 import java.util.UUID;
 
-public interface HistoryTable {
+public interface Database {
     String TABLE_NAME = "btmteleporthistory";
 
     @Update("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (UUID VARCHAR(36) NOT NULL, TIME LONG NOT NULL, FROM_LOCATION JSON, TO_LOCATION JSON)")

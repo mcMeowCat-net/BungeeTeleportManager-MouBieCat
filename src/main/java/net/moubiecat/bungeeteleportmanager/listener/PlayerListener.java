@@ -7,7 +7,7 @@ import net.moubiecat.bungeeteleportmanager.MouBieCat;
 import net.moubiecat.bungeeteleportmanager.data.HistoryData;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheData;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheManager;
-import net.moubiecat.bungeeteleportmanager.data.database.HistoryTable;
+import net.moubiecat.bungeeteleportmanager.data.database.Database;
 import net.moubiecat.bungeeteleportmanager.services.ServerLocationService;
 import net.moubiecat.bungeeteleportmanager.settings.ConfigYaml;
 import org.bukkit.Bukkit;
@@ -25,7 +25,7 @@ public final class PlayerListener implements Listener {
     private @Inject MouBieCat plugin;
     private @Inject BungeeTeleportManager teleportManager;
     private @Inject ConfigYaml config;
-    private @Inject HistoryTable database;
+    private @Inject Database database;
     private @Inject CacheManager cacheManager;
 
     /**

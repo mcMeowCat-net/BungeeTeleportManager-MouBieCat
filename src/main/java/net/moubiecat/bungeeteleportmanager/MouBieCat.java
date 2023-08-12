@@ -4,8 +4,8 @@ import com.onarandombox.MultiverseCore.MultiverseCore;
 import main.java.me.avankziar.general.object.ServerLocation;
 import main.java.me.avankziar.spigot.btm.BungeeTeleportManager;
 import net.moubiecat.bungeeteleportmanager.data.cache.CacheManager;
-import net.moubiecat.bungeeteleportmanager.data.database.HistoryTable;
-import net.moubiecat.bungeeteleportmanager.data.database.HistoryTableImpl;
+import net.moubiecat.bungeeteleportmanager.data.database.Database;
+import net.moubiecat.bungeeteleportmanager.data.database.PlayerDatabase;
 import net.moubiecat.bungeeteleportmanager.data.database.handler.ServerLocationTypeHandler;
 import net.moubiecat.bungeeteleportmanager.data.database.handler.UUIDTypeHandler;
 import net.moubiecat.bungeeteleportmanager.listener.CommandListener;
@@ -33,7 +33,7 @@ public final class MouBieCat extends JavaPlugin {
         // 資料庫依賴
         DATABASE_REGISTRATION.registerTypeHandler(UUID.class, UUIDTypeHandler.class);
         DATABASE_REGISTRATION.registerTypeHandler(ServerLocation.class, ServerLocationTypeHandler.class);
-        DATABASE_REGISTRATION.registerMapper(HistoryTable.class);
+        DATABASE_REGISTRATION.registerMapper(Database.class);
         DATABASE_REGISTRATION.buildSqlSessionFactory();
         // 綁定插件實例
         INJECT_REGISTRATION.bindPluginInstance(MouBieCat.class, this);
@@ -44,13 +44,13 @@ public final class MouBieCat extends JavaPlugin {
         INJECT_REGISTRATION.bindInstance(HistoryInventoryYaml.class, new HistoryInventoryYaml(this));
         INJECT_REGISTRATION.bindInstance(HomeInventoryYaml.class, new HomeInventoryYaml(this));
         // 資料庫
-        INJECT_REGISTRATION.bindInstance(HistoryTable.class, new HistoryTableImpl());
-        // 快取資料庫
-        INJECT_REGISTRATION.bindInstance(CacheManager.class, new CacheManager());
+        INJECT_REGISTRATION.bindInstance(Database.class, PlayerDatabase.getInstance());
+        INJECT_REGISTRATION.bindInstance(CacheManager.class, CacheManager.getInstance());
+        // 綁定注入
         INJECT_REGISTRATION.bindInjector();
 
         // 創建 MySQL 資料表
-        InjectRegistration.INJECTOR.getInstance(HistoryTable.class).createTable();
+        PlayerDatabase.getInstance().createTable();
         // 註冊事件
         Bukkit.getPluginManager().registerEvents(MouBieCat.getInstance(PlayerListener.class), this);
         Bukkit.getPluginManager().registerEvents(MouBieCat.getInstance(InventoryListener.class), this);
@@ -93,7 +93,7 @@ public final class MouBieCat extends JavaPlugin {
     /**
      * 取得插件實例
      *
-     * @return
+     * @return 插件實例
      */
     @NotNull
     public static MouBieCat getPlugin() {
