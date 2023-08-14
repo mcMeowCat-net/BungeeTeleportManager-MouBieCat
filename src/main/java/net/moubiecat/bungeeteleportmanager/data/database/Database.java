@@ -20,7 +20,7 @@ public interface Database {
             @Result(column = "FROM_LOCATION", property = "fromLocation", javaType = ServerLocation.class),
             @Result(column = "TO_LOCATION", property = "toLocation", javaType = ServerLocation.class)
     })
-    List<HistoryData> selectData(UUID uuid);
+    List<HistoryData> selectData(@Param("uuid") UUID uuid);
 
     @Insert("INSERT INTO " + TABLE_NAME + " (TIME, UUID, FROM_LOCATION, TO_LOCATION) VALUES (#{time}, #{uuid}, #{fromLocation}, #{toLocation})")
     void insertData(HistoryData data);
